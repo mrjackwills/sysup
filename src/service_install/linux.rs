@@ -24,7 +24,7 @@ impl LinuxService {
         })
     }
 
-    /// checl if we're running as sudo
+    /// Check if we're running as sudo
     fn check_sudo() {
         match sudo::check() {
             sudo::RunningAs::Root => (),
