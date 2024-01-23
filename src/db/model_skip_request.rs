@@ -73,10 +73,8 @@ mod tests {
         let db = get_db(&app_envs).await.unwrap();
         create_tables(&db).await;
 
-        
         let result = ModelSkipRequest::get(&db).await;
 
-        
         assert!(result.is_none());
         db.close().await;
         test_cleanup(uuid, None).await;
@@ -90,10 +88,8 @@ mod tests {
         let db = get_db(&app_envs).await.unwrap();
         create_tables(&db).await;
 
-        
         let result = ModelSkipRequest::insert(&db, true).await;
 
-        
         assert!(result.is_ok());
         let result = ModelSkipRequest::get(&db).await.unwrap();
         assert!(result.skip);
@@ -105,10 +101,8 @@ mod tests {
     async fn model_skip_get_ok_with_init() {
         let (_app_envs, db, uuid) = setup_test().await;
 
-        
         let result = ModelSkipRequest::get(&db).await;
 
-        
         assert!(result.is_some());
         let result = result.unwrap();
         assert!(result.skip);
@@ -123,7 +117,6 @@ mod tests {
         assert!(result.skip);
         assert_eq!(result.skip_request_id, 1);
 
-        
         let result = ModelSkipRequest::update(&db, false).await;
         assert!(result.is_ok());
         let result = result.unwrap();

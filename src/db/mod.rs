@@ -78,7 +78,7 @@ mod tests {
         let sql_name = format!("/dev/shm/{uuid}.db");
         let sql_sham = format!("{sql_name}-shm");
         let sql_wal = format!("{sql_name}-wal");
-        
+
         assert!(fs::metadata(sql_name).is_ok());
         assert!(fs::metadata(sql_sham).is_ok());
         assert!(fs::metadata(sql_wal).is_ok());
@@ -100,7 +100,7 @@ mod tests {
         let sql_name = format!("./windows_tests/{uuid}.db");
         let sql_sham = format!("{sql_name}-shm");
         let sql_wal = format!("{sql_name}-wal");
-        
+
         assert!(fs::metadata(sql_name).is_ok());
         assert!(fs::metadata(sql_sham).is_ok());
         assert!(fs::metadata(sql_wal).is_ok());
@@ -130,7 +130,6 @@ mod tests {
             .fetch_one(&db)
             .await;
 
-        
         assert!(result.is_ok());
         let result: (i64, bool) = result.unwrap();
         assert_eq!(result.0, 1);

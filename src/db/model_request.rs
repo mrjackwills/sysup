@@ -87,10 +87,9 @@ mod tests {
     async fn model_request_add_ok() {
         let (_app_envs, db, uuid) = setup_test().await;
 
-        
         let now = ModelRequest::now();
         let result = ModelRequest::insert(&db).await;
-        
+
         assert!(result.is_ok());
         let result = result.unwrap();
         assert_eq!(result.request_id, 1);
@@ -102,10 +101,9 @@ mod tests {
     async fn model_request_offset() {
         let (_app_envs, db, uuid) = setup_test().await;
 
-        
         let now = ModelRequest::now();
         let result = ModelRequest::insert(&db).await;
-        
+
         assert!(result.is_ok());
         let result = result.unwrap();
         assert_eq!(result.request_id, 1);

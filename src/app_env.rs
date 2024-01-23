@@ -191,7 +191,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_string("fish", &map);
 
-        
         assert!(result.is_err());
         assert_eq!(result.unwrap_err().to_string(), "missing env: 'fish'");
     }
@@ -204,7 +203,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_string("LOCATION_SQLITE", &map).unwrap();
 
-        
         assert_eq!(result, "/alarms.db");
     }
 
@@ -221,7 +219,6 @@ mod tests {
         let result03 = AppEnv::parse_boolean("invalid_but_false", &map);
         let result04 = AppEnv::parse_boolean("missing", &map);
 
-        
         assert!(result01);
         assert!(!result02);
         assert!(!result03);
@@ -236,7 +233,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_timezone(&map);
 
-        
         assert_eq!(result.0, "America/New_York");
 
         let mut map = HashMap::new();
@@ -245,7 +241,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_timezone(&map);
 
-        
         assert_eq!(result.0, "Europe/Berlin");
 
         let map = HashMap::new();
@@ -253,7 +248,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_timezone(&map);
 
-        
         assert_eq!(result.0, "Etc/UTC");
     }
 
@@ -264,7 +258,7 @@ mod tests {
 
         // ACTION
         let result = AppEnv::parse_timezone(&map);
-        
+
         assert_eq!(result.0, "Etc/UTC");
 
         // No timezone present
@@ -272,7 +266,6 @@ mod tests {
         let map = HashMap::new();
         let result = AppEnv::parse_timezone(&map);
 
-        
         assert_eq!(result.0, "Etc/UTC");
     }
 
@@ -283,7 +276,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::INFO);
 
         let map = HashMap::from([("LOG_DEBUG".to_owned(), "false".to_owned())]);
@@ -291,7 +283,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::INFO);
 
         let map = HashMap::from([("LOG_TRACE".to_owned(), "false".to_owned())]);
@@ -299,7 +290,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::INFO);
 
         let map = HashMap::from([
@@ -310,7 +300,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::INFO);
 
         let map = HashMap::from([
@@ -321,7 +310,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::DEBUG);
 
         let map = HashMap::from([
@@ -332,7 +320,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::TRACE);
 
         let map = HashMap::from([
@@ -343,7 +330,6 @@ mod tests {
         // ACTION
         let result = AppEnv::parse_log(&map);
 
-        
         assert_eq!(result, tracing::Level::TRACE);
     }
 
