@@ -1,9 +1,9 @@
-use std::{net::IpAddr, pin::Pin, sync::Arc};
+use std::{net::IpAddr, pin::Pin};
 
 use futures_util::Future;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
-use sqlx::{Pool, Sqlite};
+use sqlx::SqlitePool;
 use time::OffsetDateTime;
 use url::Url;
 
@@ -130,7 +130,7 @@ impl PushRequest {
 
     #[cfg(test)]
     #[allow(clippy::unused_async)]
-    async fn send_request(_url: Url) -> Result<PostRequest, AppError> {
+    async fn send_request(_: Url) -> Result<PostRequest, AppError> {
         let _client = Self::get_client()?;
         Ok(PostRequest {
             status: 1,
@@ -179,11 +179,7 @@ impl PushRequest {
 
     /// Make the request, will check to make sure that haven't made 6+ request in past hour
     /// get_ip functions are recursive, to deal with no network at first boot
-    pub async fn make_request(
-        &self,
-        app_envs: &AppEnv,
-        db: &Arc<Pool<Sqlite>>,
-    ) -> Result<(), AppError> {
+    pub async fn make_request(&self, app_envs: &AppEnv, db: &SqlitePool) -> Result<(), AppError> {
         let requests_made = ModelRequest::get_past_hour(db).await?;
 
         if requests_made.len() >= 6 {
@@ -324,7 +320,7 @@ mod tests {
 
             sqlx::query_as::<_, ModelRequest>(sql)
                 .bind(timestamp)
-                .fetch_one(&*db)
+                .fetch_one(&db)
                 .await
                 .unwrap();
         }

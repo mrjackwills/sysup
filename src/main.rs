@@ -8,7 +8,6 @@ use db::{init_db, ModelSkipRequest};
 use fd_lock::RwLock;
 use parse_cli::CliArgs;
 use request::PushRequest;
-use std::sync::Arc;
 use tracing_subscriber::{fmt, layer::SubscriberExt};
 
 mod app_env;
@@ -90,7 +89,7 @@ async fn main() -> Result<(), AppError> {
 
     if single_instance.is_ok() {
         setup_tracing(&app_envs)?;
-        let db = Arc::new(init_db(&app_envs).await?);
+        let db = init_db(&app_envs).await?;
 
         if let Ok(str) = service_install::check(&cli, &app_envs, &db).await {
             if let Some(status) = str {
@@ -118,7 +117,7 @@ mod tests {
     use crate::app_env::EnvTimeZone;
 
     use super::*;
-    use std::{path::PathBuf, sync::Arc, time::SystemTime};
+    use std::{path::PathBuf, time::SystemTime};
 
     pub fn gen_app_envs(name: Uuid) -> AppEnv {
         AppEnv {
@@ -145,15 +144,15 @@ mod tests {
         }
     }
 
-    pub async fn setup_test() -> (AppEnv, Arc<SqlitePool>, Uuid) {
+    pub async fn setup_test() -> (AppEnv, SqlitePool, Uuid) {
         let uuid = Uuid::new_v4();
         let app_envs = gen_app_envs(uuid);
-        let db = Arc::new(init_db(&app_envs).await.unwrap());
+        let db = init_db(&app_envs).await.unwrap();
         (app_envs, db, uuid)
     }
 
-    /// CLose database connection, and delete ll test files
-    pub async fn test_cleanup(uuid: Uuid, db: Option<Arc<SqlitePool>>) {
+    /// Close database connection, and delete all test files
+    pub async fn test_cleanup(uuid: Uuid, db: Option<SqlitePool>) {
         if let Some(db) = db {
             db.close().await;
         }

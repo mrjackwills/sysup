@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use sqlx::SqlitePool;
 
 use crate::{app_env::AppEnv, app_error::AppError, db::ModelSkipRequest, parse_cli::CliArgs};
@@ -37,7 +35,7 @@ impl Status {
 pub async fn check<'a>(
     cli: &CliArgs,
     app_envs: &AppEnv,
-    db: &Arc<SqlitePool>,
+    db: &SqlitePool,
 ) -> Result<Option<Status>, AppError> {
     if cli.install {
         tracing::info!("Attempting to install service");
