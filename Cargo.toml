@@ -1,6 +1,6 @@
 [package]
 name = "sysup"
-version = "0.0.1"
+version = "0.0.2"
 edition = "2021"
 authors = ["Jack Wills <email@mrjackwills.com>"]
 description = "Send a push alert when machine starts"
@@ -20,7 +20,7 @@ doc_markdown = "allow"
 similar_names = "allow"
 
 [dependencies]
-clap = { version = "4.4", features = ["derive", "unicode"] }
+clap = { version = "4.5", features = ["derive", "unicode"] }
 directories = "5.0"
 dotenvy = "0.15"
 fd-lock = "4.0"
@@ -41,20 +41,20 @@ sqlx = { version = "0.7", default-features = false, features = [
 thiserror = "1.0"
 time = { version = "0.3", features = ["local-offset", "macros"] }
 time-tz = "2.0"
-tokio = { version = "1.35", features = ["full"] }
+tokio = { version = "1.36", features = ["full"] }
 tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["json"] }
-url = "2.5.0"
+url = "2.5"
 
 [target.'cfg(target_os = "linux")'.dependencies]
 sudo = "0.6"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-auto-launch = "0.5.0"
+auto-launch = "0.5"
 
 [dev-dependencies]
-uuid = { version = "1.6", features = ["fast-rng", "v4"] }
+uuid = { version = "1.7", features = ["fast-rng", "v4"] }
 
 [profile.release]
 lto = true

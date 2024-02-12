@@ -119,7 +119,7 @@ mod tests {
             let sql = "INSERT INTO request(timestamp) VALUES ($1) RETURNING request_id, timestamp";
             sqlx::query_as::<_, ModelRequest>(sql)
                 .bind(i64::try_from(now + i).unwrap())
-                .fetch_one(&*db)
+                .fetch_one(&db)
                 .await
                 .unwrap();
         }
@@ -156,7 +156,7 @@ mod tests {
 
             sqlx::query_as::<_, ModelRequest>(sql)
                 .bind(timestamp)
-                .fetch_one(&*db)
+                .fetch_one(&db)
                 .await
                 .unwrap();
         }

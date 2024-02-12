@@ -3,19 +3,14 @@
 {
 	"name": "Rust",
 	"build": {
-		"dockerfile": "Dockerfile",
-		"args": {
-			// Use the VARIANT arg to pick a Debian OS version: buster, bullseye
-			// Use bullseye when on local on arm64/Apple Silicon.
-			"VARIANT": "bullseye"
-		}
+		"dockerfile": "Dockerfile"
 	},
 	"runArgs": [
 		"--cap-add=SYS_PTRACE",
 		"--security-opt",
 		"seccomp=unconfined"
 	],
-	"postCreateCommand": "rustup target add x86_64-unknown-linux-musl && cargo install cross typos-cli cargo-expand",
+	"postCreateCommand": "cargo install cross typos-cli cargo-expand",
 	"mounts": [
 		"source=/run/shm,target=/dev/shm,type=bind"
 	],
@@ -23,6 +18,7 @@
 		"vscode": {
 			// Add the IDs of extensions you want installed when the container is created.
 			"extensions": [
+				"adpyke.vscode-sql-formatter",
 				"bmuskalla.vscode-tldr",
 				"christian-kohler.path-intellisense",
 				"foxundermoon.shell-format",
