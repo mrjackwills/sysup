@@ -82,6 +82,7 @@ async fn main() -> Result<(), AppError> {
     let lock_file = std::fs::OpenOptions::new()
         .read(true)
         .write(true)
+        .truncate(false)
         .create(true)
         .open(&app_envs.location_lock)?;
     let mut lock_file = RwLock::new(lock_file);
