@@ -150,18 +150,15 @@ impl AppEnv {
         let current_exe_dir =
             env::current_exe().map_or(None, |p| p.ancestors().nth(1).map(|i| i.join(".env")));
 
-        let env_path = dotenvy::dotenv().map_or_else(
-            |_| {
-                current_exe_dir.map_or_else(
-                    || {
-                        println!("\n\x1b[31munable to load env file\x1b[0m\n");
-                        std::process::exit(1);
-                    },
-                    |current_exe_dir| current_exe_dir,
-                )
-            },
-            |env| env,
-        );
+        let env_path = dotenvy::dotenv().unwrap_or_else(|_| {
+            current_exe_dir.map_or_else(
+                || {
+                    println!("\n\x1b[31munable to load env file\x1b[0m\n");
+                    std::process::exit(1);
+                },
+                |current_exe_dir| current_exe_dir,
+            )
+        });
 
         dotenvy::from_path(env_path).ok();
         match Self::generate() {
