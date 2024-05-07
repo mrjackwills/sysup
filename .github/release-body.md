@@ -1,7 +1,10 @@
-### 2024-04-02
+### 2024-05-07
 
 ### Chores
-+ Rust 1.77 linting, [f2becb51a01bb5f73cc4661c565a275d76a16193]
-+ dependencies updated, [d3e07766363f9d86eff036fdfc084d28e81c8646]
++ dependencies updated, [19afbdf53c6270e39238186bb5282b15c50083ee]
++ Rust 1.78.0 linting, [72df247b63e0e6705c91ec76032d697bd258ca72]
+
+### Fixes
++ use uname in download.sh, [292d793cc4fbcdc0dd4ef863581ca87bcfeff319]
 
 see <a href='https://github.com/mrjackwills/sysup/blob/main/CHANGELOG.md'>CHANGELOG.md</a> for more details
