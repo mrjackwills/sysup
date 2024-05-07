@@ -1,9 +1,12 @@
+# <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.4'>v0.0.4</a>
+### 2024-05-07
+
 ### Chores
-+ dependencies updated, [19afbdf53c6270e39238186bb5282b15c50083ee]
-+ Rust 1.78.0 linting, [72df247b63e0e6705c91ec76032d697bd258ca72]
++ dependencies updated, [19afbdf5](https://github.com/mrjackwills/sysup/commit/19afbdf53c6270e39238186bb5282b15c50083ee)
++ Rust 1.78.0 linting, [72df247b](https://github.com/mrjackwills/sysup/commit/72df247b63e0e6705c91ec76032d697bd258ca72)
 
 ### Fixes
-+ use uname in download.sh, [292d793cc4fbcdc0dd4ef863581ca87bcfeff319]
++ use uname in download.sh, [292d793c](https://github.com/mrjackwills/sysup/commit/292d793cc4fbcdc0dd4ef863581ca87bcfeff319)
 
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.3'>v0.0.3</a>
 ### 2024-04-02
