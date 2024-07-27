@@ -4,7 +4,6 @@ use std::{
     collections::HashMap,
     env, fmt,
     path::{Path, PathBuf},
-    time::SystemTime,
 };
 use time::UtcOffset;
 use time_tz::{timezones, Offset, TimeZone};
@@ -43,7 +42,6 @@ pub struct AppEnv {
     pub location_sqlite: PathBuf,
     pub location_lock: PathBuf,
     pub log_level: tracing::Level,
-    pub start_time: SystemTime,
     pub timezone: EnvTimeZone,
     pub token_app: String,
     pub token_user: String,
@@ -138,7 +136,6 @@ impl AppEnv {
             location_sqlite: Self::location_database(&base),
             location_base: base,
             log_level: Self::parse_log(&env_map),
-            start_time: SystemTime::now(),
             timezone: Self::parse_timezone(&env_map),
             token_app: Self::parse_string("TOKEN_APP", &env_map)?,
             token_user: Self::parse_string("TOKEN_USER", &env_map)?,

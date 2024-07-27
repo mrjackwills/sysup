@@ -118,11 +118,10 @@ mod tests {
     use crate::app_env::EnvTimeZone;
 
     use super::*;
-    use std::{path::PathBuf, time::SystemTime};
+    use std::path::PathBuf;
 
     pub fn gen_app_envs(name: Uuid) -> AppEnv {
         AppEnv {
-            start_time: SystemTime::now(),
             timezone: EnvTimeZone::new("Europe/London"),
             log_level: tracing::Level::INFO,
             token_app: String::from("test_token_app"),
