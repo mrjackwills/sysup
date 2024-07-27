@@ -1,10 +1,10 @@
-### 2024-05-07
+### 2024-07-27
 
 ### Chores
-+ dependencies updated, [19afbdf53c6270e39238186bb5282b15c50083ee]
-+ Rust 1.78.0 linting, [72df247b63e0e6705c91ec76032d697bd258ca72]
++ .devcontainer updated, [cbdc0d657ce9fff44983cd5966e6b0465a624f47]
++ dependencies updated, [bae3a87da2c6d2d79e3b6ba0873dd4c99969503a], [c72ecdfb638d7b8f6b6fb98ccfbc92b46561bc3a]
 
-### Fixes
-+ use uname in download.sh, [292d793cc4fbcdc0dd4ef863581ca87bcfeff319]
+### Refactors
++ dead code removed, [fa9f8adf3b198e973c5fb7f42e1c9e04186d5fae]
 
 see <a href='https://github.com/mrjackwills/sysup/blob/main/CHANGELOG.md'>CHANGELOG.md</a> for more details
