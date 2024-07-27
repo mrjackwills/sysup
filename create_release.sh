@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# rust create_release v0.5.5
+# rust create_release
+# v0.5.6
+# 2024-07-27
 
 STAR_LINE='****************************************'
 CWD=$(pwd)
@@ -184,25 +186,25 @@ check_cross() {
 	fi
 }
 
-cargo_build_x86_linux() {
+cross_build_x86_linux() {
 	check_cross
 	echo -e "${YELLOW}cross build --target x86_64-unknown-linux-musl --release${RESET}"
 	cross build --target x86_64-unknown-linux-musl --release
 }
 
-cargo_build_aarch64_linux() {
+cross_build_aarch64_linux() {
 	check_cross
 	echo -e "${YELLOW}cross build --target aarch64-unknown-linux-musl --release${RESET}"
 	cross build --target aarch64-unknown-linux-musl --release
 }
 
-cargo_build_armv6_linux() {
+cross_build_armv6_linux() {
 	check_cross
 	echo -e "${YELLOW}cross build --target arm-unknown-linux-musleabihf --release${RESET}"
 	cross build --target arm-unknown-linux-musleabihf --release
 }
 
-cargo_build_x86_windows() {
+cross_build_x86_windows() {
 	check_cross
 	echo -e "${YELLOW}cross build --target x86_64-pc-windows-gnu --release${RESET}"
 	cross build --target x86_64-pc-windows-gnu --release
@@ -210,14 +212,14 @@ cargo_build_x86_windows() {
 
 # Build all releases that GitHub workflow would
 # This will download GB's of docker images
-cargo_build_all() {
-	cargo_build_armv6_linux
+cross_build_all() {
+	cross_build_armv6_linux
 	ask_continue
-	cargo_build_aarch64_linux
+	cross_build_aarch64_linux
 	ask_continue
-	cargo_build_x86_linux
+	cross_build_x86_linux
 	ask_continue
-	cargo_build_x86_windows
+	cross_build_x86_windows
 }
 
 # $1 text to colourise
@@ -255,7 +257,7 @@ release_flow() {
 	get_git_remote_url
 
 	cargo_test
-	cargo_build_all
+	cross_build_all
 
 	cd "${CWD}" || error_close "Can't find ${CWD}"
 	check_tag
@@ -336,23 +338,23 @@ build_choice() {
 			exit
 			;;
 		1)
-			cargo_build_x86_linux
+			cross_build_x86_linux
 			exit
 			;;
 		2)
-			cargo_build_aarch64_linux
+			cross_build_aarch64_linux
 			exit
 			;;
 		3)
-			cargo_build_armv6_linux
+			cross_build_armv6_linux
 			exit
 			;;
 		4)
-			cargo_build_x86_windows
+			cross_build_x86_windows
 			exit
 			;;
 		5)
-			cargo_build_all
+			cross_build_all
 			exit
 			;;
 		esac
