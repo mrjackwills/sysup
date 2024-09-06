@@ -56,7 +56,7 @@ impl ModelSkipRequest {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used)]
 mod tests {
     use crate::db::{create_tables, get_db};
     use crate::tests::{gen_app_envs, setup_test, test_cleanup};

@@ -79,7 +79,7 @@ WantedBy=multi-user.target"
     }
 
     /// If is sudo, and able to get a user name (which isn't root), install leafcast as a service
-    #[allow(clippy::cognitive_complexity)]
+    #[expect(clippy::cognitive_complexity)]
     fn systemd_install(app_envs: &AppEnv) -> Result<(), AppError> {
         if let Some(user_name) = Self::get_sudo_user_name() {
             Self::chown_config(&user_name, app_envs)?;
@@ -103,7 +103,7 @@ WantedBy=multi-user.target"
     }
 
     /// check if unit file in systemd, and delete if true
-    #[allow(clippy::cognitive_complexity)]
+    #[expect(clippy::cognitive_complexity)]
     fn systemd_uninstall(app_envs: &AppEnv) -> Result<(), AppError> {
         if let Some(user_name) = Self::get_sudo_user_name() {
             Self::chown_config(&user_name, app_envs)?;
@@ -144,7 +144,7 @@ impl Service for LinuxService {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
