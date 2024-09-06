@@ -56,7 +56,7 @@ pub async fn init_db(app_envs: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used)]
 mod tests {
     use uuid::Uuid;
 
@@ -79,9 +79,9 @@ mod tests {
         let sql_sham = format!("{sql_name}-shm");
         let sql_wal = format!("{sql_name}-wal");
 
-        assert!(fs::metadata(sql_name).is_ok());
-        assert!(fs::metadata(sql_sham).is_ok());
-        assert!(fs::metadata(sql_wal).is_ok());
+        assert!(fs::exists(sql_name).unwrap_or_default());
+        assert!(fs::exists(sql_sham).unwrap_or_default());
+        assert!(fs::exists(sql_wal).unwrap_or_default());
 
         db.close().await;
         // CLEANUP
@@ -101,9 +101,9 @@ mod tests {
         let sql_sham = format!("{sql_name}-shm");
         let sql_wal = format!("{sql_name}-wal");
 
-        assert!(fs::metadata(sql_name).is_ok());
-        assert!(fs::metadata(sql_sham).is_ok());
-        assert!(fs::metadata(sql_wal).is_ok());
+        assert!(fs::exists(sql_name)unwrap_or_default());
+        assert!(fs::exists(sql_sham)unwrap_or_default());
+        assert!(fs::exists(sql_wal)unwrap_or_default());
 
         db.close().await;
         // CLEANUP

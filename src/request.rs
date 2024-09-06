@@ -13,10 +13,8 @@ use crate::{app_env::AppEnv, app_error::AppError, db::ModelRequest, service_inst
 const URL: &str = "https://api.pushover.net/1/messages.json";
 
 // This shouldn't need needed, annoying clippy lint
-#[allow(unused)]
 /// What's my ipv4 url
 const URL_V4: &str = "https://myipv4.p1.opendns.com/get_my_ip";
-#[allow(unused)]
 /// What's my ipv6 url
 const URL_V6: &str = "https://myipv6.p1.opendns.com/get_my_ip";
 
@@ -99,7 +97,7 @@ impl PushRequest {
     }
 
     #[cfg(test)]
-    #[allow(unused_mut)]
+    #[expect(unused_mut)]
     /// TEst mock for ip, ipv6 issues on wsl :(
     fn get_ip(
         mut count: u8,
@@ -129,7 +127,7 @@ impl PushRequest {
     }
 
     #[cfg(test)]
-    #[allow(clippy::unused_async)]
+    #[expect(clippy::unused_async)]
     async fn send_request(_: Url) -> Result<PostRequest, AppError> {
         let _client = Self::get_client()?;
         Ok(PostRequest {
@@ -207,7 +205,7 @@ impl PushRequest {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used)]
 mod tests {
 
     use std::net::{Ipv4Addr, Ipv6Addr};

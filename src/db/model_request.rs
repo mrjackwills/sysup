@@ -77,7 +77,7 @@ impl ModelRequest {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used)]
 mod tests {
     use crate::tests::{setup_test, test_cleanup};
 
