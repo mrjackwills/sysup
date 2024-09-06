@@ -1,10 +1,13 @@
-### 2024-07-27
+### 2024-09-06
 
 ### Chores
-+ .devcontainer updated, [cbdc0d657ce9fff44983cd5966e6b0465a624f47]
-+ dependencies updated, [bae3a87da2c6d2d79e3b6ba0873dd4c99969503a], [c72ecdfb638d7b8f6b6fb98ccfbc92b46561bc3a]
++ .devcontainer updated, [ff03e760a3029ff3c35ff7b5aaea9491f94c3c3d]
++ dependencies updated, [02faf48e2bcb8e16b67d1b4a42904e2d711eff2e]
 
-### Refactors
-+ dead code removed, [fa9f8adf3b198e973c5fb7f42e1c9e04186d5fae]
+### Features
++ use fs::exists, [a519a3130413231c0b6a9582997996073a1b7cb2]
+
+### Fixes
++ use expect(x) lint, [6508809a340215963c08b0282f64102222697df9]
 
 see <a href='https://github.com/mrjackwills/sysup/blob/main/CHANGELOG.md'>CHANGELOG.md</a> for more details
