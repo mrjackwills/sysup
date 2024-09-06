@@ -79,7 +79,7 @@ impl AppEnv {
     // Get the config location, will create directory if doesn't already exist
     fn get_location() -> Result<PathBuf, AppError> {
         let base = Self::get_base();
-        if std::fs::metadata(&base).is_err() {
+        if !std::fs::exists(&base).unwrap_or_default() {
             std::fs::create_dir(&base)?;
         }
         Ok(base)
@@ -174,7 +174,7 @@ impl AppEnv {
 }
 
 #[cfg(test)]
-#[allow(clippy::unwrap_used)]
+#[expect(clippy::unwrap_used)]
 mod tests {
     use super::*;
 
