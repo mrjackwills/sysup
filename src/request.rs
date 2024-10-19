@@ -7,7 +7,7 @@ use sqlx::SqlitePool;
 use time::OffsetDateTime;
 use url::Url;
 
-use crate::{app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status, S};
+use crate::{app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status, C, S};
 
 /// Pushover api url
 const URL: &str = "https://api.pushover.net/1/messages.json";
@@ -151,8 +151,8 @@ impl PushRequest {
     /// Generate the params, aka the message
     fn gen_params<'a>(&self, app_envs: &AppEnv, ipv4: IpAddr, ipv6: IpAddr) -> Params<'a> {
         let mut params = [
-            ("token", app_envs.token_app.clone()),
-            ("user", app_envs.token_user.clone()),
+            ("token", C!(app_envs.token_app)),
+            ("user", C!(app_envs.token_user)),
             ("message", S!()),
             ("priority", S!("0")),
         ];

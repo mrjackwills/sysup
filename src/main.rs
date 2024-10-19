@@ -30,6 +30,15 @@ macro_rules! S {
     };
 }
 
+/// Simple macro to call `.clone()` on whatever is passed in
+#[macro_export]
+macro_rules! C {
+    ($i:expr) => {
+        $i.clone()
+    };
+}
+
+
 pub enum Code {
     Valid,
     Invalid,
@@ -76,7 +85,7 @@ fn setup_tracing(app_env: &AppEnv) -> Result<(), AppError> {
 
 /// Spawn a thread to watch for exit signals, so can show cursor correctly
 fn tokio_signal(app_envs: &AppEnv) {
-    let app_envs = app_envs.clone();
+    let app_envs = C!(app_envs);
     tokio::spawn(async move {
         tokio::signal::ctrl_c().await.ok();
         app_envs.rm_lock_file();
