@@ -7,7 +7,9 @@ use sqlx::SqlitePool;
 use time::OffsetDateTime;
 use url::Url;
 
-use crate::{app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status, C, S};
+use crate::{
+    app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status, C, S,
+};
 
 /// Pushover api url
 const URL: &str = "https://api.pushover.net/1/messages.json";

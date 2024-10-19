@@ -38,7 +38,6 @@ macro_rules! C {
     };
 }
 
-
 pub enum Code {
     Valid,
     Invalid,
