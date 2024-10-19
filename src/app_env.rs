@@ -308,10 +308,7 @@ mod tests {
 
         assert_eq!(result, tracing::Level::DEBUG);
 
-        let map = HashMap::from([
-            (S!("LOG_DEBUG"), S!("true")),
-            (S!("LOG_TRACE"), S!("true")),
-        ]);
+        let map = HashMap::from([(S!("LOG_DEBUG"), S!("true")), (S!("LOG_TRACE"), S!("true"))]);
 
         // ACTION
         let result = AppEnv::parse_log(&map);
