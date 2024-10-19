@@ -19,6 +19,17 @@ mod service_install;
 
 const LOGS_NAME: &str = "log";
 
+/// Simple macro to create a new String, or convert from a &str to  a String - basically just gets rid of String::from() / .to_owned() etc
+#[macro_export]
+macro_rules! S {
+    () => {
+        String::new()
+    };
+    ($s:expr) => {
+        String::from($s)
+    };
+}
+
 pub enum Code {
     Valid,
     Invalid,
@@ -124,9 +135,9 @@ mod tests {
         AppEnv {
             timezone: EnvTimeZone::new("Europe/London"),
             log_level: tracing::Level::INFO,
-            token_app: String::from("test_token_app"),
-            token_user: String::from("test_token_user"),
-            machine_name: String::from("test_machine"),
+            token_app: S!("test_token_app"),
+            token_user: S!("test_token_user"),
+            machine_name: S!("test_machine"),
 
             #[cfg(target_os = "linux")]
             location_sqlite: PathBuf::from(format!("/dev/shm/{name}.db")),

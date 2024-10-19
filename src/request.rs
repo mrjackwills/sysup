@@ -7,7 +7,7 @@ use sqlx::SqlitePool;
 use time::OffsetDateTime;
 use url::Url;
 
-use crate::{app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status};
+use crate::{app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status, S};
 
 /// Pushover api url
 const URL: &str = "https://api.pushover.net/1/messages.json";
@@ -132,7 +132,7 @@ impl PushRequest {
         let _client = Self::get_client()?;
         Ok(PostRequest {
             status: 1,
-            request: "request".to_owned(),
+            request: S!("request"),
         })
     }
 
@@ -153,8 +153,8 @@ impl PushRequest {
         let mut params = [
             ("token", app_envs.token_app.clone()),
             ("user", app_envs.token_user.clone()),
-            ("message", String::new()),
-            ("priority", String::from("0")),
+            ("message", S!()),
+            ("priority", S!("0")),
         ];
 
         let suffix = format!(
@@ -269,39 +269,39 @@ mod tests {
         let result = push_request.gen_params(&app_envs, ipv4, ipv6);
 
         // This will fail when the utc/london timezones aren't in sync
-        assert_eq!(result[0], ("token", "test_token_app".to_owned()));
+        assert_eq!(result[0], ("token", S!("test_token_app")));
 
         assert_eq!(result[2].0, "message");
         assert!(result[2].1.starts_with("test_machine online @ 20"));
         assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
 
-        assert_eq!(result[1], ("user", "test_token_user".to_owned()));
+        assert_eq!(result[1], ("user", S!("test_token_user")));
 
-        assert_eq!(result[3], ("priority", "0".to_owned()));
+        assert_eq!(result[3], ("priority", S!("0")));
 
         let push_request = PushRequest::Service(Status::Install);
         let result = push_request.gen_params(&app_envs, ipv4, ipv6);
 
-        assert_eq!(result[0], ("token", "test_token_app".to_owned()));
+        assert_eq!(result[0], ("token", S!("test_token_app")));
         assert_eq!(result[2].0, "message");
         assert!(result[2]
             .1
             .starts_with("service installed on test_machine @ 20"));
         assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
-        assert_eq!(result[1], ("user", "test_token_user".to_owned()));
-        assert_eq!(result[3], ("priority", "0".to_owned()));
+        assert_eq!(result[1], ("user", S!("test_token_user")));
+        assert_eq!(result[3], ("priority", S!("0")));
 
         let push_request = PushRequest::Service(Status::Uninstall);
         let result = push_request.gen_params(&app_envs, ipv4, ipv6);
 
-        assert_eq!(result[0], ("token", "test_token_app".to_owned()));
+        assert_eq!(result[0], ("token", S!("test_token_app")));
         assert_eq!(result[2].0, "message");
         assert!(result[2]
             .1
             .starts_with("service uninstalled on test_machine @ 20"));
         assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
-        assert_eq!(result[1], ("user", "test_token_user".to_owned()));
-        assert_eq!(result[3], ("priority", "0".to_owned()));
+        assert_eq!(result[1], ("user", S!("test_token_user")));
+        assert_eq!(result[3], ("priority", S!("0")));
 
         test_cleanup(uuid, Some(db)).await;
     }
