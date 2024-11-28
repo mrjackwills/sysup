@@ -1,3 +1,9 @@
+# <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.8'>v0.0.8</a>
+### 2024-11-28
+
+### Chores
++ dependencies updated, [a06ca330](https://github.com/mrjackwills/sysup/commit/a06ca33079424ed43d5bebe0c1f5ed0078a12927)
+
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.7'>v0.0.7</a>
 ### 2024-10-19
 
