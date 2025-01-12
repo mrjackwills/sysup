@@ -32,7 +32,7 @@ impl Status {
 }
 
 /// check the cli args, and perform (un)install if necessary
-pub async fn check<'a>(
+pub async fn check(
     cli: &CliArgs,
     app_envs: &AppEnv,
     db: &SqlitePool,
