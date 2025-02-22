@@ -52,7 +52,7 @@ impl AppEnv {
     #[cfg(target_os = "windows")]
     fn get_base() -> PathBuf {
         BaseDirs::new()
-            .map_or_else(|| PathBuf::from("."), |f| f.config_dir().to_path_buf())
+            .map_or_else(|| PathBuf::from("."), |f| f.config_local_dir().to_path_buf())
             .join(env!("CARGO_PKG_NAME"))
     }
 
