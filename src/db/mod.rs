@@ -4,9 +4,9 @@ mod model_skip_request;
 pub use model_request::ModelRequest;
 pub use model_skip_request::ModelSkipRequest;
 
-use sqlx::{sqlite::SqliteJournalMode, ConnectOptions, SqlitePool};
+use sqlx::{ConnectOptions, SqlitePool, sqlite::SqliteJournalMode};
 
-use crate::{app_env::AppEnv, exit, Code};
+use crate::{Code, app_env::AppEnv, exit};
 
 /// Open Sqlite pool connection, and return
 /// `max_connections` need to be 1, [see issue](https://github.com/launchbadge/sqlx/issues/816)

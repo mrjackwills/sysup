@@ -1,4 +1,4 @@
-use crate::{app_error::AppError, S};
+use crate::{S, app_error::AppError};
 use directories::BaseDirs;
 use std::{
     collections::HashMap,
@@ -6,7 +6,7 @@ use std::{
     path::{Path, PathBuf},
 };
 use time::UtcOffset;
-use time_tz::{timezones, Offset, TimeZone};
+use time_tz::{Offset, TimeZone, timezones};
 
 type EnvHashMap = HashMap<String, String>;
 
@@ -52,7 +52,10 @@ impl AppEnv {
     #[cfg(target_os = "windows")]
     fn get_base() -> PathBuf {
         BaseDirs::new()
-            .map_or_else(|| PathBuf::from("."), |f| f.config_local_dir().to_path_buf())
+            .map_or_else(
+                || PathBuf::from("."),
+                |f| f.config_local_dir().to_path_buf(),
+            )
             .join(env!("CARGO_PKG_NAME"))
     }
 

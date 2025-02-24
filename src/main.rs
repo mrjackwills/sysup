@@ -4,7 +4,7 @@
 )]
 use app_env::AppEnv;
 use app_error::AppError;
-use db::{init_db, ModelSkipRequest};
+use db::{ModelSkipRequest, init_db};
 use fd_lock::RwLock;
 use parse_cli::CliArgs;
 use request::PushRequest;

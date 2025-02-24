@@ -8,7 +8,7 @@ use time::OffsetDateTime;
 use url::Url;
 
 use crate::{
-    app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status, C, S,
+    C, S, app_env::AppEnv, app_error::AppError, db::ModelRequest, service_install::Status,
 };
 
 /// Pushover api url
@@ -286,9 +286,11 @@ mod tests {
 
         assert_eq!(result[0], ("token", S!("test_token_app")));
         assert_eq!(result[2].0, "message");
-        assert!(result[2]
-            .1
-            .starts_with("service installed on test_machine @ 20"));
+        assert!(
+            result[2]
+                .1
+                .starts_with("service installed on test_machine @ 20")
+        );
         assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
@@ -298,9 +300,11 @@ mod tests {
 
         assert_eq!(result[0], ("token", S!("test_token_app")));
         assert_eq!(result[2].0, "message");
-        assert!(result[2]
-            .1
-            .starts_with("service uninstalled on test_machine @ 20"));
+        assert!(
+            result[2]
+                .1
+                .starts_with("service uninstalled on test_machine @ 20")
+        );
         assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
