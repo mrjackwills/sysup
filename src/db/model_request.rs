@@ -1,13 +1,11 @@
+use jiff::{SpanRound, ToSpan, Unit, Zoned};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
-use std::{
-    fmt,
-    time::{Duration, SystemTime},
-};
-use time::OffsetDateTime;
+use std::time::Duration;
+use std::{fmt, time::SystemTime};
 
-use crate::app_env::AppEnv;
 use crate::app_error::AppError;
+use crate::{C, app_env::AppEnv};
 
 #[derive(sqlx::FromRow, Debug, Clone, Serialize, Deserialize, PartialEq, Eq, PartialOrd, Ord)]
 pub struct ModelRequest {
@@ -35,14 +33,12 @@ impl ModelRequest {
             .as_secs()
     }
 
-    pub fn now_with_offset(app_envs: &AppEnv) -> OffsetDateTime {
-        time::OffsetDateTime::UNIX_EPOCH.to_offset(app_envs.timezone.get_offset())
-            + Duration::from_secs(Self::now())
+    pub fn now_with_offset(app_envs: &AppEnv) -> jiff::Zoned {
+        jiff::Timestamp::now().to_zoned(C!(app_envs.timezone))
     }
 
-    pub fn timestamp_to_offset(&self, app_envs: &AppEnv) -> OffsetDateTime {
-        time::OffsetDateTime::UNIX_EPOCH.to_offset(app_envs.timezone.get_offset())
-            + Duration::from_secs(self.timestamp)
+    pub fn timestamp_to_offset(&self, app_envs: &AppEnv) -> Zoned {
+        Self::now_with_offset(app_envs).saturating_add(Duration::from_secs(self.timestamp))
     }
 
     #[cfg(test)]
@@ -56,7 +52,10 @@ impl ModelRequest {
     pub async fn get_past_hour(db: &SqlitePool) -> Result<Vec<Self>, AppError> {
         let sql = "SELECT * FROM request WHERE timestamp BETWEEN $1 AND $2 ORDER BY timestamp";
         let now = i64::try_from(Self::now())?;
-        let one_hour = time::Duration::HOUR.whole_seconds();
+        let one_hour = 1
+            .hour()
+            .round(SpanRound::new().largest(Unit::Second))
+            .map_or(0, |i| i.get_seconds());
         let result = sqlx::query_as::<_, Self>(sql)
             .bind(now - one_hour)
             .bind(now)
@@ -79,6 +78,7 @@ impl ModelRequest {
 #[cfg(test)]
 #[expect(clippy::unwrap_used)]
 mod tests {
+
     use crate::tests::{setup_test, test_cleanup};
 
     use super::*;
@@ -152,7 +152,7 @@ mod tests {
         let now = i64::try_from(ModelRequest::now()).unwrap();
         for i in 1..=4 {
             let sql = "INSERT INTO request(timestamp) VALUES ($1) RETURNING request_id, timestamp";
-            let timestamp = now - (time::Duration::MINUTE.whole_seconds() * (i * 25));
+            let timestamp = now - (60 * (i * 25));
 
             sqlx::query_as::<_, ModelRequest>(sql)
                 .bind(timestamp)
@@ -165,19 +165,16 @@ mod tests {
 
         assert!(result.is_ok());
         let result = result.unwrap();
-
         assert_eq!(result.len(), 2);
 
         let expected = vec![
             ModelRequest {
                 request_id: 2,
-                timestamp: u64::try_from(now - (time::Duration::MINUTE.whole_seconds() * 50))
-                    .unwrap(),
+                timestamp: u64::try_from(now - (60 * 50)).unwrap(),
             },
             ModelRequest {
                 request_id: 1,
-                timestamp: u64::try_from(now - (time::Duration::MINUTE.whole_seconds() * 25))
-                    .unwrap(),
+                timestamp: u64::try_from(now - (60 * 25)).unwrap(),
             },
         ];
 

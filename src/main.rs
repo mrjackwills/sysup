@@ -131,17 +131,16 @@ async fn main() -> Result<(), AppError> {
 #[cfg(test)]
 #[expect(clippy::unwrap_used)]
 mod tests {
+    use jiff::tz::TimeZone;
     use sqlx::SqlitePool;
     use uuid::Uuid;
-
-    use crate::app_env::EnvTimeZone;
 
     use super::*;
     use std::path::PathBuf;
 
     pub fn gen_app_envs(name: Uuid) -> AppEnv {
         AppEnv {
-            timezone: EnvTimeZone::new("Europe/London"),
+            timezone: TimeZone::UTC,
             log_level: tracing::Level::INFO,
             token_app: S!("test_token_app"),
             token_user: S!("test_token_user"),
@@ -165,7 +164,8 @@ mod tests {
 
     pub async fn setup_test() -> (AppEnv, SqlitePool, Uuid) {
         let uuid = Uuid::new_v4();
-        let app_envs = gen_app_envs(uuid);
+        let mut app_envs = gen_app_envs(uuid);
+        app_envs.timezone = TimeZone::get("Europe/London").unwrap();
         let db = init_db(&app_envs).await.unwrap();
         (app_envs, db, uuid)
     }

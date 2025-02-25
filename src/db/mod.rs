@@ -60,7 +60,6 @@ pub async fn init_db(app_envs: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
 mod tests {
     use uuid::Uuid;
 
-    use crate::app_env::EnvTimeZone;
     use std::fs;
 
     use super::*;
@@ -114,9 +113,7 @@ mod tests {
     // By default, database will have skip=true set
     async fn sql_mod_db_created_with_skip() {
         let uuid = Uuid::new_v4();
-        let timezone = "Europe/London";
-        let mut args = gen_app_envs(uuid);
-        args.timezone = EnvTimeZone::new(timezone);
+        let args = gen_app_envs(uuid);
 
         init_db(&args).await.unwrap();
         let db = sqlx::pool::PoolOptions::<sqlx::Sqlite>::new()

@@ -1,10 +1,10 @@
 use std::{net::IpAddr, pin::Pin};
 
 use futures_util::Future;
+use jiff::Zoned;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
-use time::OffsetDateTime;
 use url::Url;
 
 use crate::{
@@ -139,14 +139,14 @@ impl PushRequest {
     }
 
     /// Basically fmt::Display for the current time using the app_env timezone
-    fn format_offset(app_envs: &AppEnv, offset: &OffsetDateTime) -> String {
+    fn format_offset(app_envs: &AppEnv, offset: &Zoned) -> String {
         format!(
             "{} {:02}:{:02}:{:02} {}",
             offset.date(),
             offset.hour(),
             offset.minute(),
             offset.second(),
-            app_envs.timezone
+            app_envs.timezone.iana_name().unwrap_or_default()
         )
     }
 
@@ -320,7 +320,7 @@ mod tests {
         let now = i64::try_from(ModelRequest::now()).unwrap();
         for i in 1..=6 {
             let sql = "INSERT INTO request(timestamp) VALUES ($1) RETURNING request_id, timestamp";
-            let timestamp = now - (time::Duration::MINUTE.whole_seconds() * (i * 2));
+            let timestamp = now - (60 * (i * 2));
 
             sqlx::query_as::<_, ModelRequest>(sql)
                 .bind(timestamp)
