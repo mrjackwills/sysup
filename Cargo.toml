@@ -40,7 +40,7 @@ sqlx = { version = "0.8", default-features = false, features = [
 	"sqlite",
 ] }
 thiserror = "2.0"
-tokio = { version = "1.43", features = ["full"] }
+tokio = { version = "1.44", features = ["full"] }
 tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["json"] }
@@ -53,7 +53,7 @@ sudo = "0.6"
 auto-launch = "0.5"
 
 [dev-dependencies]
-uuid = { version = "1.14", features = ["fast-rng", "v4"] }
+uuid = { version = "1.16", features = ["fast-rng", "v4"] }
 
 [profile.release]
 lto = true
