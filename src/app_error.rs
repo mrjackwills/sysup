@@ -13,8 +13,6 @@ pub enum AppError {
     IOError(#[from] std::io::Error),
     #[error("missing env: '{0}'")]
     MissingEnv(String),
-    #[error("Time offset error")]
-    Offset(#[from] time::error::ComponentRange),
     #[error("No network connection")]
     Offline,
     #[error("Reqwest Error")]

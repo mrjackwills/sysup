@@ -1,6 +1,6 @@
 use crate::app_env::AppEnv;
 use crate::app_error::AppError;
-use crate::{exit, Code};
+use crate::{Code, exit};
 use std::{env, fs, io::Write, path::Path, process::Command};
 use tracing::debug;
 

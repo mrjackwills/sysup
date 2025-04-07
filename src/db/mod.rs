@@ -4,9 +4,9 @@ mod model_skip_request;
 pub use model_request::ModelRequest;
 pub use model_skip_request::ModelSkipRequest;
 
-use sqlx::{sqlite::SqliteJournalMode, ConnectOptions, SqlitePool};
+use sqlx::{ConnectOptions, SqlitePool, sqlite::SqliteJournalMode};
 
-use crate::{app_env::AppEnv, exit, Code};
+use crate::{Code, app_env::AppEnv, exit};
 
 /// Open Sqlite pool connection, and return
 /// `max_connections` need to be 1, [see issue](https://github.com/launchbadge/sqlx/issues/816)
@@ -60,7 +60,6 @@ pub async fn init_db(app_envs: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
 mod tests {
     use uuid::Uuid;
 
-    use crate::app_env::EnvTimeZone;
     use std::fs;
 
     use super::*;
@@ -114,9 +113,7 @@ mod tests {
     // By default, database will have skip=true set
     async fn sql_mod_db_created_with_skip() {
         let uuid = Uuid::new_v4();
-        let timezone = "Europe/London";
-        let mut args = gen_app_envs(uuid);
-        args.timezone = EnvTimeZone::new(timezone);
+        let args = gen_app_envs(uuid);
 
         init_db(&args).await.unwrap();
         let db = sqlx::pool::PoolOptions::<sqlx::Sqlite>::new()
