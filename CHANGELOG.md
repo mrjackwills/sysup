@@ -1,3 +1,13 @@
+# <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.11'>v0.0.11</a>
+### 2025-05-24
+
+### Chores
++ .devcontainer updated, [a789e78c](https://github.com/mrjackwills/sysup/commit/a789e78c8776acb5bccc6b4db1b46bdb7f8696f6)
++ dependencies updated, [a470aec2](https://github.com/mrjackwills/sysup/commit/a470aec271dcd79422f86bb30e12f213f6c90800)
+
+### Fixes
++ error typo, [737b7281](https://github.com/mrjackwills/sysup/commit/737b72812bfde64d14acae52fd92b67150914728)
+
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.10'>v0.0.10</a>
 ### 2025-04-07
 
