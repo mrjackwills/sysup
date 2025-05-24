@@ -7,7 +7,7 @@ pub enum AppError {
     #[cfg(target_os = "windows")]
     #[error("Autolaunch error: {0}")]
     AutoLaunch(#[from] auto_launch::Error),
-    #[error("Url parsing error: {0}")]
+    #[error("Int conversion error: {0}")]
     Convert(#[from] TryFromIntError),
     #[error("IO Error")]
     IOError(#[from] std::io::Error),
