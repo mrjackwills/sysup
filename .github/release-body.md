@@ -1,15 +1,10 @@
-### 2025-04-07
+### 2025-05-24
 
 ### Chores
-+ create_release.sh updated, [2bf8b83ef49763326e248408afa5b0ce828f2ecd]
-+ .devcontainer updated, [e0f80f2dda25457a5014d09db85fb6f9cbe47c2a]
-+ dependencies updated, [ffccf8586caaa6d594c206bd122309681c4bd705], [010e40a1c8db693cd01eeb80fa720e5edbcd23cc]
-
-### Features
-+ use jiff for time methods, [9dae06b59e49de5fabb072a102ab3b20ecaa1b75]
-+ Rust 2024 edition, [f7108726fd239f70457c5e6bd20bd98c6c80e5c2]
++ .devcontainer updated, [a789e78c8776acb5bccc6b4db1b46bdb7f8696f6]
++ dependencies updated, [a470aec271dcd79422f86bb30e12f213f6c90800]
 
 ### Fixes
-+ use config_local_dir, [4c4460da8628415daf1dd1ac9011ead02c9e0da2]
++ error typo, [737b72812bfde64d14acae52fd92b67150914728]
 
 see <a href='https://github.com/mrjackwills/sysup/blob/main/CHANGELOG.md'>CHANGELOG.md</a> for more details
