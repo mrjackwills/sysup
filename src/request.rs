@@ -179,6 +179,7 @@ impl PushRequest {
 
     /// Make the request, will check to make sure that haven't made 6+ request in past hour
     /// get_ip functions are recursive, to deal with no network at first boot
+    #[allow(clippy::cognitive_complexity)]
     pub async fn make_request(&self, app_envs: &AppEnv, db: &SqlitePool) -> Result<(), AppError> {
         let requests_made = ModelRequest::get_past_hour(db).await?;
 

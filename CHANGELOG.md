@@ -1,3 +1,10 @@
+# <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.12'>v0.0.12</a>
+### 2025-07-02
+
+### Chores
++ create_release.sh updated, [030372a9](https://github.com/mrjackwills/sysup/commit/030372a9a0a1d089252a0877753b6cd9aef61be4)
++ dependencies updated, [8caab961](https://github.com/mrjackwills/sysup/commit/8caab96195d23764acb1c7f3332d2696ca89ff72)
+
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.11'>v0.0.11</a>
 ### 2025-05-24
 
