@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[test]
-    /// Systemd unti file is created correctly
+    /// Systemd unit file is created correctly
     fn test_systemd_create_service_file() {
         let result = LinuxService::create_service_file("test_user");
         assert!(result.is_ok());
