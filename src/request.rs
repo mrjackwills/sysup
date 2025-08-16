@@ -114,8 +114,8 @@ impl PushRequest {
 
             Ok(IpResponse {
                 ip: match ip {
-                    Ip::V4 => IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)),
-                    Ip::V6 => IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1)),
+                    Ip::V4 => IpAddr::V4(Ipv4Addr::LOCALHOST),
+                    Ip::V6 => IpAddr::V6(Ipv6Addr::LOCALHOST),
                 },
             })
         })
@@ -265,8 +265,8 @@ mod tests {
     #[tokio::test]
     async fn test_request_generate_params() {
         let (app_envs, db, uuid) = setup_test().await;
-        let ipv4 = IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1));
-        let ipv6 = IpAddr::V6(Ipv6Addr::new(0, 0, 0, 0, 0, 0, 0, 1));
+        let ipv4 = IpAddr::V4(Ipv4Addr::LOCALHOST);
+        let ipv6 = IpAddr::V6(Ipv6Addr::LOCALHOST);
 
         let push_request = PushRequest::Online;
         let result = push_request.gen_params(&app_envs, ipv4, ipv6);
