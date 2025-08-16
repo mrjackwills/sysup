@@ -1,6 +1,9 @@
+# <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.13'>v0.0.13</a>
+### 2025-08-16
+
 ### Chores
-+ dependencies updated, [847ee4c897244e918dd22c6488fa2f5482e4d750]
-+ Rust 1.89 linting, [1b46316270c95d0ac4017a728ca0f84bed454879]
++ dependencies updated, [847ee4c8](https://github.com/mrjackwills/sysup/commit/847ee4c897244e918dd22c6488fa2f5482e4d750)
++ Rust 1.89 linting, [1b463162](https://github.com/mrjackwills/sysup/commit/1b46316270c95d0ac4017a728ca0f84bed454879)
 
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.12'>v0.0.12</a>
 ### 2025-07-02
