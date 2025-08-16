@@ -117,9 +117,10 @@ async fn main() -> Result<(), AppError> {
                     .make_request(&app_envs, &db)
                     .await?;
             } else if let Some(skip_request) = ModelSkipRequest::get(&db).await
-                && !skip_request.skip {
-                    PushRequest::Online.make_request(&app_envs, &db).await?;
-                }
+                && !skip_request.skip
+            {
+                PushRequest::Online.make_request(&app_envs, &db).await?;
+            }
         }
         app_envs.rm_lock_file();
     }
