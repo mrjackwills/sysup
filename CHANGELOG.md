@@ -1,13 +1,16 @@
+# <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.14'>v0.0.14</a>
+### 2025-09-24
+
 ### Chores
-+ create_release.sh updated, [1712c5e9482d0cd207a269aaa23c18d4885fa380], [1eb252d1a5d32346afdad37b44acb4805a4d65c9]
-+ dependencies updated, [edabe159a2284ed155215733bd364ab71feb8080], [f3b3743477791c84f008731e961ea54d93a5ed00]
-+ GitHub workflow updated, [1886a44f729a8d2825916cdd69570c4be62b35ae], [ddae7fdb70af77f3e83dd864411dfddc26379749]
++ create_release.sh updated, [1712c5e9](https://github.com/mrjackwills/sysup/commit/1712c5e9482d0cd207a269aaa23c18d4885fa380), [1eb252d1](https://github.com/mrjackwills/sysup/commit/1eb252d1a5d32346afdad37b44acb4805a4d65c9)
++ dependencies updated, [edabe159](https://github.com/mrjackwills/sysup/commit/edabe159a2284ed155215733bd364ab71feb8080), [f3b37434](https://github.com/mrjackwills/sysup/commit/f3b3743477791c84f008731e961ea54d93a5ed00)
++ GitHub workflow updated, [1886a44f](https://github.com/mrjackwills/sysup/commit/1886a44f729a8d2825916cdd69570c4be62b35ae), [ddae7fdb](https://github.com/mrjackwills/sysup/commit/ddae7fdb70af77f3e83dd864411dfddc26379749)
 
 ### Features
-+ add local ip to request, [4b69648abef1dc9725904509bc44026806ebc4cd]
++ add local ip to request, [4b69648a](https://github.com/mrjackwills/sysup/commit/4b69648abef1dc9725904509bc44026806ebc4cd)
 
 ### Refactors
-+ change from Box::pin to a basic async loop, [69c8a2302cd0e278b62ce0c40a6f8393e8140ff5]
++ change from Box::pin to a basic async loop, [69c8a230](https://github.com/mrjackwills/sysup/commit/69c8a2302cd0e278b62ce0c40a6f8393e8140ff5)
 
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.13'>v0.0.13</a>
 ### 2025-08-16
