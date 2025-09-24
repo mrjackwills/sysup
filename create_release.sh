@@ -220,13 +220,19 @@ cargo_clean() {
 	cargo clean
 }
 
+cargo_build() {
+	echo -e "${YELLOW}cargo build --release${RESET}"
+	cargo build --release
+}
+
 # Build all releases that GitHub workflow would
 # This will download GB's of docker images
 # $1 is 0 or 1, if 1 won't run ask_continue
-cross_build_all() {
+cargo_cross_build_all() {
 	if ask_yn "cargo clean"; then
 		cargo_clean
 	fi
+	cargo_build
 	skip_confirm=$1
 	cross_build_armv6_linux
 	[ "$skip_confirm" -ne 1 ] && ask_continue
@@ -272,7 +278,7 @@ release_flow() {
 	get_git_remote_url
 
 	cargo_test
-	cross_build_all 0
+	cargo_cross_build_all 0
 
 	cd "${CWD}" || error_close "Can't find ${CWD}"
 	check_tag
@@ -370,11 +376,11 @@ build_choice() {
 			exit
 			;;
 		5)
-			cross_build_all 0
+			cargo_cross_build_all 0
 			exit
 			;;
 		6)
-			cross_build_all 1
+			cargo_cross_build_all 1
 			exit
 			;;
 		esac
