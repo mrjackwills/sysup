@@ -93,6 +93,7 @@ impl PushRequest {
         }
     }
 
+    // todo get internal ip?
     #[cfg(test)]
     #[expect(clippy::unused_async)]
     /// Test mock for ip, ipv6 issues on wsl :(
@@ -154,9 +155,13 @@ impl PushRequest {
             ("priority", S!("0")),
         ];
 
+        let local_ip =
+            local_ip_address::local_ip().map_or_else(|_| S!("UNKNOWN"), |ip| ip.to_string());
+
         let suffix = format!(
-            "@ {} {} {}",
+            "@ {} {} {} {}",
             Self::format_offset(app_envs, &ModelRequest::now_with_offset(app_envs)),
+            local_ip,
             ipv4,
             ipv6
         );
@@ -272,7 +277,11 @@ mod tests {
 
         assert_eq!(result[2].0, "message");
         assert!(result[2].1.starts_with("test_machine online @ 20"));
-        assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
+        assert!(
+            result[2]
+                .1
+                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+        );
 
         assert_eq!(result[1], ("user", S!("test_token_user")));
 
@@ -288,7 +297,11 @@ mod tests {
                 .1
                 .starts_with("service installed on test_machine @ 20")
         );
-        assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
+        assert!(
+            result[2]
+                .1
+                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+        );
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
 
@@ -302,7 +315,11 @@ mod tests {
                 .1
                 .starts_with("service uninstalled on test_machine @ 20")
         );
-        assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
+        assert!(
+            result[2]
+                .1
+                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+        );
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
 

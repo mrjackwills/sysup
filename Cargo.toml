@@ -27,6 +27,7 @@ dotenvy = "0.15"
 fd-lock = "4.0"
 futures-util = "0.3"
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
+local-ip-address = "0.6.5"
 reqwest = { version = "0.12", default-features = false, features = [
 	"brotli",
 	"gzip",
