@@ -1,6 +1,5 @@
-use std::{net::IpAddr, pin::Pin};
+use std::net::IpAddr;
 
-use futures_util::Future;
 use jiff::Zoned;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -14,7 +13,6 @@ use crate::{
 /// Pushover api url
 const URL: &str = "https://api.pushover.net/1/messages.json";
 
-// This shouldn't need needed, annoying clippy lint
 /// What's my ipv4 url
 const URL_V4: &str = "https://myipv4.p1.opendns.com/get_my_ip";
 /// What's my ipv6 url
@@ -78,47 +76,45 @@ impl PushRequest {
 
     #[cfg(not(test))]
     /// Recursive function to check if network is up
-    fn get_ip(
-        mut count: u8,
-        ip: Ip,
-    ) -> Pin<Box<dyn Future<Output = Result<IpResponse, AppError>> + Send>> {
-        Box::pin(async move {
+    async fn get_ip(mut count: u8, ip: Ip) -> Result<IpResponse, AppError> {
+        loop {
             if count > 10 {
                 return Err(AppError::Offline);
             }
-            let client = Self::get_client()?;
-            if let Ok(response) = client.get(ip.get_url()).send().await {
-                Ok(response.json::<IpResponse>().await?)
-            } else {
-                tracing::debug!("Recursively sleeping for 500ms");
-                tokio::time::sleep(std::time::Duration::from_millis(500)).await;
-                count += 1;
-                Self::get_ip(count, ip).await
+            if let Ok(client) = Self::get_client()
+                && let Ok(response) = client.get(ip.get_url()).send().await
+                && let Ok(resp) = response.json::<IpResponse>().await
+            {
+                return Ok(resp);
             }
-        })
+            tracing::debug!("Recursively sleeping for 500ms");
+            tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+            count += 1;
+        }
     }
 
+    // todo get internal ip?
     #[cfg(test)]
-    #[expect(unused_mut)]
-    /// TEst mock for ip, ipv6 issues on wsl :(
-    fn get_ip(
-        mut count: u8,
-        ip: Ip,
-    ) -> Pin<Box<dyn Future<Output = Result<IpResponse, AppError>> + Send>> {
+    #[expect(clippy::unused_async)]
+    /// Test mock for ip, ipv6 issues on wsl :(
+    async fn get_ip(mut count: u8, ip: Ip) -> Result<IpResponse, AppError> {
         use std::net::{Ipv4Addr, Ipv6Addr};
 
-        Box::pin(async move {
+        loop {
             if count > 10 {
                 return Err(AppError::Offline);
             }
 
-            Ok(IpResponse {
-                ip: match ip {
-                    Ip::V4 => IpAddr::V4(Ipv4Addr::LOCALHOST),
-                    Ip::V6 => IpAddr::V6(Ipv6Addr::LOCALHOST),
-                },
-            })
-        })
+            if count > 4 {
+                return Ok(IpResponse {
+                    ip: match ip {
+                        Ip::V4 => IpAddr::V4(Ipv4Addr::LOCALHOST),
+                        Ip::V6 => IpAddr::V6(Ipv6Addr::LOCALHOST),
+                    },
+                });
+            }
+            count += 1;
+        }
     }
 
     #[cfg(not(test))]
@@ -159,13 +155,18 @@ impl PushRequest {
             ("priority", S!("0")),
         ];
 
+        let local_ip =
+            local_ip_address::local_ip().map_or_else(|_| S!("UNKNOWN"), |ip| ip.to_string());
+
         let suffix = format!(
-            "@ {} {} {}",
+            "@ {} {} {} {}",
             Self::format_offset(app_envs, &ModelRequest::now_with_offset(app_envs)),
+            local_ip,
             ipv4,
             ipv6
         );
 
+        // todo add internal ip address
         match self {
             Self::Online => {
                 params[2].1 = format!("{} online {suffix}", app_envs.machine_name,);
@@ -276,7 +277,11 @@ mod tests {
 
         assert_eq!(result[2].0, "message");
         assert!(result[2].1.starts_with("test_machine online @ 20"));
-        assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
+        assert!(
+            result[2]
+                .1
+                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+        );
 
         assert_eq!(result[1], ("user", S!("test_token_user")));
 
@@ -292,7 +297,11 @@ mod tests {
                 .1
                 .starts_with("service installed on test_machine @ 20")
         );
-        assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
+        assert!(
+            result[2]
+                .1
+                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+        );
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
 
@@ -306,7 +315,11 @@ mod tests {
                 .1
                 .starts_with("service uninstalled on test_machine @ 20")
         );
-        assert!(result[2].1.contains(" Europe/London 127.0.0.1 ::1"));
+        assert!(
+            result[2]
+                .1
+                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+        );
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
 
