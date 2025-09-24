@@ -1,6 +1,6 @@
 [package]
 name = "sysup"
-version = "0.0.13"
+version = "0.0.14"
 edition = "2024"
 authors = ["Jack Wills <email@mrjackwills.com>"]
 description = "Send a push alert when machine starts"
