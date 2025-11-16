@@ -166,7 +166,6 @@ impl PushRequest {
             ipv6
         );
 
-        // todo add internal ip address
         match self {
             Self::Online => {
                 params[2].1 = format!("{} online {suffix}", app_envs.machine_name,);
@@ -264,6 +263,7 @@ mod tests {
     }
 
     #[tokio::test]
+    // TODO fix this test, as 172.17.0.2 can change, depending on Docker dev container networking
     async fn test_request_generate_params() {
         let (app_envs, db, uuid) = setup_test().await;
         let ipv4 = IpAddr::V4(Ipv4Addr::LOCALHOST);
@@ -280,7 +280,7 @@ mod tests {
         assert!(
             result[2]
                 .1
-                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+                .contains(" Europe/London 172.17.0.2 127.0.0.1 ::1")
         );
 
         assert_eq!(result[1], ("user", S!("test_token_user")));
@@ -300,7 +300,7 @@ mod tests {
         assert!(
             result[2]
                 .1
-                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+                .contains(" Europe/London 172.17.0.2 127.0.0.1 ::1")
         );
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
@@ -318,7 +318,7 @@ mod tests {
         assert!(
             result[2]
                 .1
-                .contains(" Europe/London 172.17.0.3 127.0.0.1 ::1")
+                .contains(" Europe/London 172.17.0.2 127.0.0.1 ::1")
         );
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));

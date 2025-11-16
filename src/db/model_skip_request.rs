@@ -20,15 +20,6 @@ impl fmt::Display for ModelSkipRequest {
     }
 }
 
-// impl Default for ModelSkipRequest {
-//     fn default() -> Self {
-//         Self {
-//             skip_request_id: 1,
-//             skip: true,
-//         }
-//     }
-// }
-
 impl ModelSkipRequest {
     pub async fn get(db: &SqlitePool) -> Option<Self> {
         let sql = "SELECT * FROM skip_request";
@@ -69,7 +60,6 @@ mod tests {
         let uuid = Uuid::new_v4();
         let app_envs = gen_app_envs(uuid);
 
-        // file_exists(&app_envs.location_sqlite);
         let db = get_db(&app_envs).await.unwrap();
         create_tables(&db).await;
 
@@ -84,7 +74,6 @@ mod tests {
     async fn model_skip_insert_ok() {
         let uuid = Uuid::new_v4();
         let app_envs = gen_app_envs(uuid);
-        // file_exists(&app_envs.location_sqlite);
         let db = get_db(&app_envs).await.unwrap();
         create_tables(&db).await;
 
