@@ -1,4 +1,4 @@
-### CHores
+### Chores
 + dependencies updated, [b81a6b8baf4af285bd25afa04c521d21bf73fd7b]
 
 ### Refactors
