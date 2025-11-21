@@ -1,3 +1,9 @@
+### Chores
++ dependencies updated, [5070d4eee6ed8dd68354a89fde80136b480b99db]
+
+### Refactors
++ tokio_join, [1fd1812370978f006d1f72db70d7016cb577869e]
+
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.0.15'>v0.0.15</a>
 ### 2025-11-16
 
