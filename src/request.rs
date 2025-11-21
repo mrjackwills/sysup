@@ -193,11 +193,10 @@ impl PushRequest {
             }
         } else {
             tracing::debug!("Checking network connection");
-            let ipv4 = Self::get_ip(0, Ip::V4).await?.ip;
-            let ipv6 = Self::get_ip(0, Ip::V6).await?.ip;
+            let (ipv4, ipv6) = tokio::try_join!(Self::get_ip(0, Ip::V4), Self::get_ip(0, Ip::V6))?;
 
             tracing::debug!("Sending request");
-            let params = self.gen_params(app_envs, ipv4, ipv6);
+            let params = self.gen_params(app_envs, ipv4.ip, ipv6.ip);
             let url = reqwest::Url::parse_with_params(URL, &params)?;
             ModelRequest::insert(db).await?;
             Self::send_request(url).await?;

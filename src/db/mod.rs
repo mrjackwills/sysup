@@ -48,7 +48,6 @@ async fn create_tables(db: &SqlitePool) {
 
 /// Init db connection, works if folder/files exists or not
 pub async fn init_db(app_envs: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
-    // file_exists(&app_envs.location_sqlite);
     let db = get_db(app_envs).await?;
     create_tables(&db).await;
     insert_skip_request(&db).await;
