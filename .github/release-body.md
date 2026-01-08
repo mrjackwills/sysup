@@ -1,9 +1,10 @@
-### 2025-11-16
+### 2026-01-08
 
 ### Chores
-+ dependencies updated, [b81a6b8baf4af285bd25afa04c521d21bf73fd7b]
++ dependencies updated, [5070d4eee6ed8dd68354a89fde80136b480b99db], [fcd310f5c384ca471651b81bcf67407f3d2a6762]
++ GitHub workflow updated, [382381ab454c1a54a08c2b4d16492fbc956036b7]
 
 ### Refactors
-+ dead code removed, [83ac3ee663b496a80c6ff68b5e9da037a7031eac]
++ tokio_join, [1fd1812370978f006d1f72db70d7016cb577869e]
 
 see <a href='https://github.com/mrjackwills/sysup/blob/main/CHANGELOG.md'>CHANGELOG.md</a> for more details
