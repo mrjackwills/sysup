@@ -34,23 +34,23 @@ impl Status {
 /// check the cli args, and perform (un)install if necessary
 pub async fn check(
     cli: &CliArgs,
-    app_envs: &AppEnv,
+    app_env: &AppEnv,
     db: &SqlitePool,
 ) -> Result<Option<Status>, AppError> {
     if cli.install {
         tracing::info!("Attempting to install service");
         #[cfg(target_os = "linux")]
-        LinuxService::install(app_envs)?;
+        LinuxService::install(app_env)?;
         #[cfg(target_os = "windows")]
-        WindowsService::install(app_envs)?;
+        WindowsService::install(app_env)?;
         ModelSkipRequest::update(db, false).await?;
         Ok(Some(Status::Install))
     } else if cli.uninstall {
         tracing::info!("Attempting to uninstall service");
         #[cfg(target_os = "linux")]
-        LinuxService::uninstall(app_envs)?;
+        LinuxService::uninstall(app_env)?;
         #[cfg(target_os = "windows")]
-        WindowsService::uninstall(app_envs)?;
+        WindowsService::uninstall(app_env)?;
         ModelSkipRequest::update(db, true).await?;
         Ok(Some(Status::Uninstall))
     } else {

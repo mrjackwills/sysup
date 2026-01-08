@@ -83,46 +83,49 @@ fn setup_tracing(app_env: &AppEnv) -> Result<(), AppError> {
 }
 
 /// Spawn a thread to watch for exit signals, so can show cursor correctly
-fn tokio_signal(app_envs: &AppEnv) {
-    let app_envs = C!(app_envs);
+fn tokio_signal(app_env: &AppEnv) {
+    let app_env = C!(app_env);
     tokio::spawn(async move {
         tokio::signal::ctrl_c().await.ok();
-        app_envs.rm_lock_file();
+        app_env.rm_lock_file();
         exit("ctrl+c", &Code::Invalid);
     });
 }
 
-#[tokio::main]
-async fn main() -> Result<(), AppError> {
-    let cli: CliArgs = CliArgs::new();
-    let app_envs = AppEnv::get();
-
-    tokio_signal(&app_envs);
+fn is_single_instance(app_env: &AppEnv) -> Result<bool, AppError> {
     let lock_file = std::fs::OpenOptions::new()
         .read(true)
         .write(true)
         .truncate(false)
         .create(true)
-        .open(&app_envs.location_lock)?;
+        .open(&app_env.location_lock)?;
     let mut lock_file = RwLock::new(lock_file);
-    let single_instance = lock_file.try_write();
+    Ok(lock_file.try_write().is_ok())
+}
 
-    if single_instance.is_ok() {
-        setup_tracing(&app_envs)?;
-        let db = init_db(&app_envs).await?;
+#[tokio::main]
+async fn main() -> Result<(), AppError> {
+    let cli: CliArgs = CliArgs::new();
+    let app_env = AppEnv::get();
 
-        if let Ok(str) = service_install::check(&cli, &app_envs, &db).await {
+    tokio_signal(&app_env);
+
+    if is_single_instance(&app_env)? {
+        setup_tracing(&app_env)?;
+        let db = init_db(&app_env).await?;
+
+        if let Ok(str) = service_install::check(&cli, &app_env, &db).await {
             if let Some(status) = str {
                 PushRequest::from(status)
-                    .make_request(&app_envs, &db)
+                    .make_request(&app_env, &db)
                     .await?;
             } else if let Some(skip_request) = ModelSkipRequest::get(&db).await
                 && !skip_request.skip
             {
-                PushRequest::Online.make_request(&app_envs, &db).await?;
+                PushRequest::Online.make_request(&app_env, &db).await?;
             }
         }
-        app_envs.rm_lock_file();
+        app_env.rm_lock_file();
     }
 
     Ok(())
@@ -138,7 +141,7 @@ mod tests {
     use super::*;
     use std::path::PathBuf;
 
-    pub fn gen_app_envs(name: Uuid) -> AppEnv {
+    pub fn gen_app_env(name: Uuid) -> AppEnv {
         AppEnv {
             timezone: TimeZone::UTC,
             log_level: tracing::Level::INFO,
@@ -164,10 +167,10 @@ mod tests {
 
     pub async fn setup_test() -> (AppEnv, SqlitePool, Uuid) {
         let uuid = Uuid::new_v4();
-        let mut app_envs = gen_app_envs(uuid);
-        app_envs.timezone = TimeZone::get("Europe/London").unwrap();
-        let db = init_db(&app_envs).await.unwrap();
-        (app_envs, db, uuid)
+        let mut app_env = gen_app_env(uuid);
+        app_env.timezone = TimeZone::get("Europe/London").unwrap();
+        let db = init_db(&app_env).await.unwrap();
+        (app_env, db, uuid)
     }
 
     /// Close database connection, and delete all test files

@@ -1,17 +1,15 @@
 [package]
 name = "sysup"
-version = "0.0.15"
+version = "0.1.0"
 edition = "2024"
 authors = ["Jack Wills <email@mrjackwills.com>"]
 description = "Send a push alert when machine starts"
-rust-version = "1.90.0"
+rust-version = "1.91.0"
 
 [lints.rust]
 unsafe_code = "forbid"
 
 [lints.clippy]
-nursery = { level = "warn", priority = -1 }
-pedantic = { level = "warn", priority = -1 }
 unused_async = "warn"
 unwrap_used = "warn"
 expect_used = "warn"
@@ -28,11 +26,11 @@ fd-lock = "4.0"
 futures-util = "0.3"
 jiff = { version = "0.2", features = ["tzdb-bundle-always"] }
 local-ip-address = "0.6"
-reqwest = { version = "0.12", default-features = false, features = [
+reqwest = { version = "0.13", default-features = false, features = [
 	"brotli",
 	"gzip",
 	"json",
-	"rustls-tls-native-roots",
+	"default-tls"
 ] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
@@ -42,7 +40,7 @@ sqlx = { version = "0.8", default-features = false, features = [
 	"sqlite",
 ] }
 thiserror = "2.0"
-tokio = { version = "1.48", features = ["full"] }
+tokio = { version = "1.49", features = ["full"] }
 tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["json"] }
@@ -55,7 +53,7 @@ sudo = "0.6"
 auto-launch = "0.5"
 
 [dev-dependencies]
-uuid = { version = "1.18", features = ["fast-rng", "v4"] }
+uuid = { version = "1.19", features = ["fast-rng", "v4"] }
 
 [profile.release]
 lto = true
@@ -63,3 +61,4 @@ codegen-units = 1
 panic = 'abort'
 strip = true
 debug = false
+opt-level = 2

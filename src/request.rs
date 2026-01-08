@@ -1,4 +1,4 @@
-use std::net::IpAddr;
+use std::{fmt, net::IpAddr};
 
 use jiff::Zoned;
 use reqwest::Client;
@@ -28,14 +28,25 @@ struct PostRequest {
 }
 
 /// Response from the what's my ip api
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 struct IpResponse {
     ip: IpAddr,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone)]
 enum Ip {
     V4,
     V6,
+}
+
+impl fmt::Display for Ip {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let x = match self {
+            Self::V4 => 4,
+            Self::V6 => 6,
+        };
+        write!(f, "IPV{x}")
+    }
 }
 
 #[allow(unused)]
@@ -76,16 +87,17 @@ impl PushRequest {
 
     #[cfg(not(test))]
     /// Recursive function to check if network is up
-    async fn get_ip(mut count: u8, ip: Ip) -> Result<IpResponse, AppError> {
+    async fn get_ip(mut count: u8, ip: Ip) -> Result<Option<IpResponse>, AppError> {
         loop {
             if count > 10 {
-                return Err(AppError::Offline);
+                tracing::debug!("{ip} no response");
+                return Ok(None);
             }
             if let Ok(client) = Self::get_client()
                 && let Ok(response) = client.get(ip.get_url()).send().await
                 && let Ok(resp) = response.json::<IpResponse>().await
             {
-                return Ok(resp);
+                return Ok(Some(resp));
             }
             tracing::debug!("Recursively sleeping for 500ms");
             tokio::time::sleep(std::time::Duration::from_millis(500)).await;
@@ -93,25 +105,24 @@ impl PushRequest {
         }
     }
 
-    // todo get internal ip?
     #[cfg(test)]
     #[expect(clippy::unused_async)]
     /// Test mock for ip, ipv6 issues on wsl :(
-    async fn get_ip(mut count: u8, ip: Ip) -> Result<IpResponse, AppError> {
+    async fn get_ip(mut count: u8, ip: Ip) -> Result<Option<IpResponse>, AppError> {
         use std::net::{Ipv4Addr, Ipv6Addr};
-
         loop {
             if count > 10 {
-                return Err(AppError::Offline);
+                tracing::debug!("{ip} no response");
+                return Ok(None);
             }
 
             if count > 4 {
-                return Ok(IpResponse {
+                return Ok(Some(IpResponse {
                     ip: match ip {
                         Ip::V4 => IpAddr::V4(Ipv4Addr::LOCALHOST),
                         Ip::V6 => IpAddr::V6(Ipv6Addr::LOCALHOST),
                     },
-                });
+                }));
             }
             count += 1;
         }
@@ -135,22 +146,27 @@ impl PushRequest {
     }
 
     /// Basically fmt::Display for the current time using the app_env timezone
-    fn format_offset(app_envs: &AppEnv, offset: &Zoned) -> String {
+    fn format_offset(app_env: &AppEnv, offset: &Zoned) -> String {
         format!(
             "{} {:02}:{:02}:{:02} {}",
             offset.date(),
             offset.hour(),
             offset.minute(),
             offset.second(),
-            app_envs.timezone.iana_name().unwrap_or_default()
+            app_env.timezone.iana_name().unwrap_or_default()
         )
     }
 
     /// Generate the params, aka the message
-    fn gen_params<'a>(&self, app_envs: &AppEnv, ipv4: IpAddr, ipv6: IpAddr) -> Params<'a> {
+    fn gen_params<'a>(
+        &self,
+        app_env: &AppEnv,
+        ipv4: Option<IpResponse>,
+        ipv6: Option<IpResponse>,
+    ) -> Params<'a> {
         let mut params = [
-            ("token", C!(app_envs.token_app)),
-            ("user", C!(app_envs.token_user)),
+            ("token", C!(app_env.token_app)),
+            ("user", C!(app_env.token_user)),
             ("message", S!()),
             ("priority", S!("0")),
         ];
@@ -160,18 +176,18 @@ impl PushRequest {
 
         let suffix = format!(
             "@ {} {} {} {}",
-            Self::format_offset(app_envs, &ModelRequest::now_with_offset(app_envs)),
+            Self::format_offset(app_env, &ModelRequest::now_with_offset(app_env)),
             local_ip,
-            ipv4,
-            ipv6
+            ipv4.map_or(String::new(), |i| i.ip.to_string()),
+            ipv6.map_or(String::new(), |i| i.ip.to_string())
         );
 
         match self {
             Self::Online => {
-                params[2].1 = format!("{} online {suffix}", app_envs.machine_name,);
+                params[2].1 = format!("{} online {suffix}", app_env.machine_name,);
             }
             Self::Service(status) => {
-                params[2].1 = format!("{} on {} {suffix}", status.get(), app_envs.machine_name,);
+                params[2].1 = format!("{} on {} {suffix}", status.get(), app_env.machine_name,);
             }
         }
         params
@@ -180,7 +196,7 @@ impl PushRequest {
     /// Make the request, will check to make sure that haven't made 6+ request in past hour
     /// get_ip functions are recursive, to deal with no network at first boot
     #[allow(clippy::cognitive_complexity)]
-    pub async fn make_request(&self, app_envs: &AppEnv, db: &SqlitePool) -> Result<(), AppError> {
+    pub async fn make_request(&self, app_env: &AppEnv, db: &SqlitePool) -> Result<(), AppError> {
         let requests_made = ModelRequest::get_past_hour(db).await?;
 
         if requests_made.len() >= 6 {
@@ -188,16 +204,15 @@ impl PushRequest {
             for i in requests_made {
                 tracing::info!(
                     "{}",
-                    Self::format_offset(app_envs, &i.timestamp_to_offset(app_envs))
+                    Self::format_offset(app_env, &i.timestamp_to_offset(app_env))
                 );
             }
         } else {
             tracing::debug!("Checking network connection");
-            let ipv4 = Self::get_ip(0, Ip::V4).await?.ip;
-            let ipv6 = Self::get_ip(0, Ip::V6).await?.ip;
+            let (ipv4, ipv6) = tokio::try_join!(Self::get_ip(0, Ip::V4), Self::get_ip(0, Ip::V6))?;
 
             tracing::debug!("Sending request");
-            let params = self.gen_params(app_envs, ipv4, ipv6);
+            let params = self.gen_params(app_env, ipv4, ipv6);
             let url = reqwest::Url::parse_with_params(URL, &params)?;
             ModelRequest::insert(db).await?;
             Self::send_request(url).await?;
@@ -218,10 +233,9 @@ mod tests {
 
     #[tokio::test]
     async fn test_request_format_offset() {
-        let (app_envs, db, uuid) = setup_test().await;
+        let (app_env, db, uuid) = setup_test().await;
 
-        let result =
-            PushRequest::format_offset(&app_envs, &ModelRequest::now_with_offset(&app_envs));
+        let result = PushRequest::format_offset(&app_env, &ModelRequest::now_with_offset(&app_env));
 
         let separator = |index: usize, sym: &str| {
             assert_eq!(result.chars().skip(index).take(1).collect::<String>(), sym);
@@ -262,33 +276,44 @@ mod tests {
         test_cleanup(uuid, Some(db)).await;
     }
 
+    #[cfg(target_os = "windows")]
+    fn test_ip() -> &'static str {
+        " Europe/London 192.168.0"
+    }
+    #[cfg(not(target_os = "windows"))]
+    fn test_ip() -> &'static str {
+        " Europe/London 172.17.0"
+    }
     #[tokio::test]
-    // TODO fix this test, as 172.17.0.2 can change, depending on Docker dev container networking
     async fn test_request_generate_params() {
-        let (app_envs, db, uuid) = setup_test().await;
-        let ipv4 = IpAddr::V4(Ipv4Addr::LOCALHOST);
-        let ipv6 = IpAddr::V6(Ipv6Addr::LOCALHOST);
+        let (app_env, db, uuid) = setup_test().await;
+        let ipv4 = IpResponse {
+            ip: IpAddr::V4(Ipv4Addr::LOCALHOST),
+        };
+        let ipv6 = IpResponse {
+            ip: IpAddr::V6(Ipv6Addr::LOCALHOST),
+        };
 
         let push_request = PushRequest::Online;
-        let result = push_request.gen_params(&app_envs, ipv4, ipv6);
+        let result = push_request.gen_params(&app_env, Some(ipv4.clone()), Some(ipv6.clone()));
 
         // This will fail when the utc/london timezones aren't in sync
         assert_eq!(result[0], ("token", S!("test_token_app")));
 
+        println!("{}", result[2].1);
+
         assert_eq!(result[2].0, "message");
         assert!(result[2].1.starts_with("test_machine online @ 20"));
-        assert!(
-            result[2]
-                .1
-                .contains(" Europe/London 172.17.0.2 127.0.0.1 ::1")
-        );
+        // 192.168.0.19
+        assert!(result[2].1.contains(test_ip()));
+        assert!(result[2].1.contains(" 127.0.0.1 ::1"));
 
         assert_eq!(result[1], ("user", S!("test_token_user")));
 
         assert_eq!(result[3], ("priority", S!("0")));
 
         let push_request = PushRequest::Service(Status::Install);
-        let result = push_request.gen_params(&app_envs, ipv4, ipv6);
+        let result = push_request.gen_params(&app_env, Some(ipv4.clone()), Some(ipv6.clone()));
 
         assert_eq!(result[0], ("token", S!("test_token_app")));
         assert_eq!(result[2].0, "message");
@@ -297,16 +322,13 @@ mod tests {
                 .1
                 .starts_with("service installed on test_machine @ 20")
         );
-        assert!(
-            result[2]
-                .1
-                .contains(" Europe/London 172.17.0.2 127.0.0.1 ::1")
-        );
+        assert!(result[2].1.contains(test_ip()));
+        assert!(result[2].1.contains(" 127.0.0.1 ::1"));
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
 
         let push_request = PushRequest::Service(Status::Uninstall);
-        let result = push_request.gen_params(&app_envs, ipv4, ipv6);
+        let result = push_request.gen_params(&app_env, Some(ipv4), Some(ipv6));
 
         assert_eq!(result[0], ("token", S!("test_token_app")));
         assert_eq!(result[2].0, "message");
@@ -315,11 +337,8 @@ mod tests {
                 .1
                 .starts_with("service uninstalled on test_machine @ 20")
         );
-        assert!(
-            result[2]
-                .1
-                .contains(" Europe/London 172.17.0.2 127.0.0.1 ::1")
-        );
+        assert!(result[2].1.contains(test_ip()));
+        assert!(result[2].1.contains(" 127.0.0.1 ::1"));
         assert_eq!(result[1], ("user", S!("test_token_user")));
         assert_eq!(result[3], ("priority", S!("0")));
 
@@ -329,7 +348,7 @@ mod tests {
     #[tokio::test]
     // Request not made if 6+ requests been made in previous 60 minutes
     async fn test_request_make_request_not_made() {
-        let (app_envs, db, uuid) = setup_test().await;
+        let (app_env, db, uuid) = setup_test().await;
 
         let now = i64::try_from(ModelRequest::now()).unwrap();
         for i in 1..=6 {
@@ -347,7 +366,7 @@ mod tests {
         assert!(request_len.is_ok());
         assert_eq!(request_len.unwrap().len(), 6);
 
-        let result = PushRequest::Online.make_request(&app_envs, &db).await;
+        let result = PushRequest::Online.make_request(&app_env, &db).await;
 
         assert!(result.is_ok());
 
@@ -362,7 +381,8 @@ mod tests {
     // Request made, and inserted into db
     async fn test_request_get_ip_count() {
         let result = PushRequest::get_ip(11, Ip::V4).await;
-        assert!(result.is_err());
+        assert!(result.is_ok());
+        assert!(result.unwrap().is_none())
     }
 
     #[tokio::test]
@@ -372,13 +392,13 @@ mod tests {
     #[tokio::test]
     // Request made, and inserted into db
     async fn test_request_make_request() {
-        let (app_envs, db, uuid) = setup_test().await;
+        let (app_env, db, uuid) = setup_test().await;
 
         let request_len = ModelRequest::get_all(&db).await;
         assert!(request_len.is_ok());
         assert_eq!(request_len.unwrap().len(), 0);
 
-        let result = PushRequest::Online.make_request(&app_envs, &db).await;
+        let result = PushRequest::Online.make_request(&app_env, &db).await;
 
         assert!(result.is_ok());
 

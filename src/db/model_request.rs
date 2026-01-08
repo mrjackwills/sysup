@@ -33,12 +33,12 @@ impl ModelRequest {
             .as_secs()
     }
 
-    pub fn now_with_offset(app_envs: &AppEnv) -> jiff::Zoned {
-        jiff::Timestamp::now().to_zoned(C!(app_envs.timezone))
+    pub fn now_with_offset(app_env: &AppEnv) -> jiff::Zoned {
+        jiff::Timestamp::now().to_zoned(C!(app_env.timezone))
     }
 
-    pub fn timestamp_to_offset(&self, app_envs: &AppEnv) -> Zoned {
-        Self::now_with_offset(app_envs).saturating_add(Duration::from_secs(self.timestamp))
+    pub fn timestamp_to_offset(&self, app_env: &AppEnv) -> Zoned {
+        Self::now_with_offset(app_env).saturating_add(Duration::from_secs(self.timestamp))
     }
 
     #[cfg(test)]
@@ -85,7 +85,7 @@ mod tests {
 
     #[tokio::test]
     async fn model_request_add_ok() {
-        let (_app_envs, db, uuid) = setup_test().await;
+        let (_app_env, db, uuid) = setup_test().await;
 
         let now = ModelRequest::now();
         let result = ModelRequest::insert(&db).await;
@@ -99,7 +99,7 @@ mod tests {
 
     #[tokio::test]
     async fn model_request_offset() {
-        let (_app_envs, db, uuid) = setup_test().await;
+        let (_app_env, db, uuid) = setup_test().await;
 
         let now = ModelRequest::now();
         let result = ModelRequest::insert(&db).await;
@@ -113,7 +113,7 @@ mod tests {
 
     #[tokio::test]
     async fn model_request_get_all_ok() {
-        let (_app_envs, db, uuid) = setup_test().await;
+        let (_app_env, db, uuid) = setup_test().await;
         let now = ModelRequest::now();
         for i in 0..4 {
             let sql = "INSERT INTO request(timestamp) VALUES ($1) RETURNING request_id, timestamp";
@@ -147,7 +147,7 @@ mod tests {
 
     #[tokio::test]
     async fn model_request_get_last_hour_ok() {
-        let (_app_envs, db, uuid) = setup_test().await;
+        let (_app_env, db, uuid) = setup_test().await;
 
         let now = i64::try_from(ModelRequest::now()).unwrap();
         for i in 1..=4 {
