@@ -67,12 +67,12 @@ WantedBy=multi-user.target"
     }
 
     /// Change the ownership of the config and it's content
-    fn chown_config(user_name: &str, app_envs: &AppEnv) -> Result<(), AppError> {
+    fn chown_config(user_name: &str, app_env: &AppEnv) -> Result<(), AppError> {
         Command::new(CHOWN)
             .args([
                 "-R",
                 &format!("{user_name}:{user_name}"),
-                app_envs.location_base.display().to_string().as_str(),
+                app_env.location_base.display().to_string().as_str(),
             ])
             .output()?;
         Ok(())
@@ -80,9 +80,9 @@ WantedBy=multi-user.target"
 
     /// If is sudo, and able to get a user name (which isn't root), install leafcast as a service
     #[expect(clippy::cognitive_complexity)]
-    fn systemd_install(app_envs: &AppEnv) -> Result<(), AppError> {
+    fn systemd_install(app_env: &AppEnv) -> Result<(), AppError> {
         if let Some(user_name) = Self::get_sudo_user_name() {
-            Self::chown_config(&user_name, app_envs)?;
+            Self::chown_config(&user_name, app_env)?;
 
             debug!("Create service file");
             let mut file = fs::File::create(Self::get_dot_service())?;
@@ -104,9 +104,9 @@ WantedBy=multi-user.target"
 
     /// check if unit file in systemd, and delete if true
     #[expect(clippy::cognitive_complexity)]
-    fn systemd_uninstall(app_envs: &AppEnv) -> Result<(), AppError> {
+    fn systemd_uninstall(app_env: &AppEnv) -> Result<(), AppError> {
         if let Some(user_name) = Self::get_sudo_user_name() {
-            Self::chown_config(&user_name, app_envs)?;
+            Self::chown_config(&user_name, app_env)?;
             let service = Self::get_service_name();
 
             let path = Self::get_dot_service();
@@ -132,14 +132,14 @@ WantedBy=multi-user.target"
 }
 
 impl Service for LinuxService {
-    fn uninstall(app_envs: &AppEnv) -> Result<(), AppError> {
+    fn uninstall(app_env: &AppEnv) -> Result<(), AppError> {
         Self::check_sudo();
-        Self::systemd_uninstall(app_envs)
+        Self::systemd_uninstall(app_env)
     }
 
-    fn install(app_envs: &AppEnv) -> Result<(), AppError> {
-        Self::uninstall(app_envs)?;
-        Self::systemd_install(app_envs)
+    fn install(app_env: &AppEnv) -> Result<(), AppError> {
+        Self::uninstall(app_env)?;
+        Self::systemd_install(app_env)
     }
 }
 

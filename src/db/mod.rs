@@ -10,13 +10,13 @@ use crate::{Code, app_env::AppEnv, exit};
 
 /// Open Sqlite pool connection, and return
 /// `max_connections` need to be 1, [see issue](https://github.com/launchbadge/sqlx/issues/816)
-async fn get_db(app_envs: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
+async fn get_db(app_env: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
     let mut connect_options = sqlx::sqlite::SqliteConnectOptions::new()
-        .filename(&app_envs.location_sqlite)
+        .filename(&app_env.location_sqlite)
         .create_if_missing(true)
         .journal_mode(SqliteJournalMode::Wal);
 
-    match app_envs.log_level {
+    match app_env.log_level {
         tracing::Level::TRACE | tracing::Level::DEBUG => (),
         _ => connect_options = connect_options.disable_statement_logging(),
     }
@@ -47,8 +47,8 @@ async fn create_tables(db: &SqlitePool) {
 }
 
 /// Init db connection, works if folder/files exists or not
-pub async fn init_db(app_envs: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
-    let db = get_db(app_envs).await?;
+pub async fn init_db(app_env: &AppEnv) -> Result<SqlitePool, sqlx::Error> {
+    let db = get_db(app_env).await?;
     create_tables(&db).await;
     insert_skip_request(&db).await;
     Ok(db)
@@ -62,13 +62,13 @@ mod tests {
     use std::fs;
 
     use super::*;
-    use crate::tests::{gen_app_envs, test_cleanup};
+    use crate::tests::{gen_app_env, test_cleanup};
 
     #[tokio::test]
     #[cfg(target_os = "linux")]
     async fn sql_mod_db_created() {
         let uuid = Uuid::new_v4();
-        let args = gen_app_envs(uuid);
+        let args = gen_app_env(uuid);
 
         // ACTION
         let db = init_db(&args).await.unwrap();
@@ -90,7 +90,7 @@ mod tests {
     #[cfg(target_os = "windows")]
     async fn sql_mod_db_created() {
         let uuid = Uuid::new_v4();
-        let args = gen_app_envs(uuid);
+        let args = gen_app_env(uuid);
 
         // ACTION
         let db = init_db(&args).await.unwrap();
@@ -99,9 +99,9 @@ mod tests {
         let sql_sham = format!("{sql_name}-shm");
         let sql_wal = format!("{sql_name}-wal");
 
-        assert!(fs::exists(sql_name)unwrap_or_default());
-        assert!(fs::exists(sql_sham)unwrap_or_default());
-        assert!(fs::exists(sql_wal)unwrap_or_default());
+        assert!(fs::exists(sql_name).unwrap_or_default());
+        assert!(fs::exists(sql_sham).unwrap_or_default());
+        assert!(fs::exists(sql_wal).unwrap_or_default());
 
         db.close().await;
         // CLEANUP
@@ -112,7 +112,7 @@ mod tests {
     // By default, database will have skip=true set
     async fn sql_mod_db_created_with_skip() {
         let uuid = Uuid::new_v4();
-        let args = gen_app_envs(uuid);
+        let args = gen_app_env(uuid);
 
         init_db(&args).await.unwrap();
         let db = sqlx::pool::PoolOptions::<sqlx::Sqlite>::new()

@@ -13,8 +13,6 @@ pub enum AppError {
     IOError(#[from] std::io::Error),
     #[error("missing env: '{0}'")]
     MissingEnv(String),
-    #[error("No network connection")]
-    Offline,
     #[error("Reqwest Error")]
     Reqwest(#[from] reqwest::Error),
     #[error("Internal Database Error: {0}")]

@@ -50,7 +50,7 @@ impl ModelSkipRequest {
 #[expect(clippy::unwrap_used)]
 mod tests {
     use crate::db::{create_tables, get_db};
-    use crate::tests::{gen_app_envs, setup_test, test_cleanup};
+    use crate::tests::{gen_app_env, setup_test, test_cleanup};
     use uuid::Uuid;
 
     use super::*;
@@ -58,9 +58,9 @@ mod tests {
     #[tokio::test]
     async fn model_skip_get_empty_with_init() {
         let uuid = Uuid::new_v4();
-        let app_envs = gen_app_envs(uuid);
+        let app_env = gen_app_env(uuid);
 
-        let db = get_db(&app_envs).await.unwrap();
+        let db = get_db(&app_env).await.unwrap();
         create_tables(&db).await;
 
         let result = ModelSkipRequest::get(&db).await;
@@ -73,8 +73,8 @@ mod tests {
     #[tokio::test]
     async fn model_skip_insert_ok() {
         let uuid = Uuid::new_v4();
-        let app_envs = gen_app_envs(uuid);
-        let db = get_db(&app_envs).await.unwrap();
+        let app_env = gen_app_env(uuid);
+        let db = get_db(&app_env).await.unwrap();
         create_tables(&db).await;
 
         let result = ModelSkipRequest::insert(&db, true).await;
@@ -88,7 +88,7 @@ mod tests {
 
     #[tokio::test]
     async fn model_skip_get_ok_with_init() {
-        let (_app_envs, db, uuid) = setup_test().await;
+        let (_app_env, db, uuid) = setup_test().await;
 
         let result = ModelSkipRequest::get(&db).await;
 
@@ -100,7 +100,7 @@ mod tests {
 
     #[tokio::test]
     async fn model_skip_update_ok() {
-        let (_app_envs, db, uuid) = setup_test().await;
+        let (_app_env, db, uuid) = setup_test().await;
 
         let result = ModelSkipRequest::get(&db).await.unwrap();
         assert!(result.skip);
