@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2024"
 authors = ["Jack Wills <email@mrjackwills.com>"]
 description = "Send a push alert when machine starts"
-rust-version = "1.91.0"
+rust-version = "1.93.0"
 
 [lints.rust]
 unsafe_code = "forbid"
@@ -50,7 +50,7 @@ url = "2.5"
 sudo = "0.6"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-auto-launch = "0.5"
+auto-launch = "0.6"
 
 [dev-dependencies]
 uuid = { version = "1.19", features = ["fast-rng", "v4"] }
