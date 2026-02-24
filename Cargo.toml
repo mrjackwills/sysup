@@ -53,7 +53,7 @@ sudo = "0.6"
 auto-launch = "0.6"
 
 [dev-dependencies]
-uuid = { version = "1.19", features = ["fast-rng", "v4"] }
+uuid = { version = "1.21", features = ["fast-rng", "v4"] }
 
 [profile.release]
 lto = true
