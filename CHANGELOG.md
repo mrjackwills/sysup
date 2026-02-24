@@ -1,3 +1,6 @@
+### Chores
++ dependencies updated, [03f01ca80d24de20dc4d3e3b0d47f040a940774b], [7afd1e69bdf5b3900b8f1c11e8843f4cde8a94a8]
+
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.1.0'>v0.1.0</a>
 ### 2026-01-08
 
