@@ -1,6 +1,7 @@
-### 2026-02-24
+### 2026-03-19
 
 ### Chores
-+ dependencies updated, [03f01ca80d24de20dc4d3e3b0d47f040a940774b], [7afd1e69bdf5b3900b8f1c11e8843f4cde8a94a8]
++ GitHub workflow updated, [81b543f02742363c12d7863b16aa98fd9247c21b]
++ dependencies updated, [33139ae4955ea5032c216f6cc5e5568b3486cfe2]
 
 see <a href='https://github.com/mrjackwills/sysup/blob/main/CHANGELOG.md'>CHANGELOG.md</a> for more details
