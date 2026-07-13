@@ -1,3 +1,7 @@
+### Chores
++ .devcontainer updated, [c4b3e83c869096e5a43de209d8f67dfd274ff1ef]
++ dependencies updated, [c788a798be416f931b6e3fc659888fc7ca43e94e]
+
 # <a href='https://github.com/mrjackwills/sysup/releases/tag/v0.1.3'>v0.1.3</a>
 ### 2026-04-28
 
