@@ -83,24 +83,11 @@ fn setup_tracing(app_env: &AppEnv) -> Result<(), AppError> {
 }
 
 /// Spawn a thread to watch for exit signals, so can show cursor correctly
-fn tokio_signal(app_env: &AppEnv) {
-    let app_env = C!(app_env);
-    tokio::spawn(async move {
+fn tokio_signal() {
+    tokio::spawn(async {
         tokio::signal::ctrl_c().await.ok();
-        app_env.rm_lock_file();
         exit("ctrl+c", &Code::Invalid);
     });
-}
-
-fn is_single_instance(app_env: &AppEnv) -> Result<bool, AppError> {
-    let lock_file = std::fs::OpenOptions::new()
-        .read(true)
-        .write(true)
-        .truncate(false)
-        .create(true)
-        .open(&app_env.location_lock)?;
-    let mut lock_file = RwLock::new(lock_file);
-    Ok(lock_file.try_write().is_ok())
 }
 
 #[tokio::main]
@@ -108,24 +95,40 @@ async fn main() -> Result<(), AppError> {
     let cli: CliArgs = CliArgs::new();
     let app_env = AppEnv::get();
 
-    tokio_signal(&app_env);
+    tokio_signal();
 
-    if is_single_instance(&app_env)? {
-        setup_tracing(&app_env)?;
-        let db = init_db(&app_env).await?;
+    let lock_file = std::fs::OpenOptions::new()
+        .read(true)
+        .write(true)
+        .truncate(false)
+        .create(true)
+        .open(&app_env.location_lock)?;
+    let mut lock = RwLock::new(lock_file);
 
-        if let Ok(str) = service_install::check(&cli, &app_env, &db).await {
-            if let Some(status) = str {
-                PushRequest::from(status)
-                    .make_request(&app_env, &db)
-                    .await?;
-            } else if let Some(skip_request) = ModelSkipRequest::get(&db).await
+    // Guard is held until main returns, blocking any concurrent instance
+    let Ok(_lock_guard) = lock.try_write() else {
+        return Ok(());
+    };
+
+    setup_tracing(&app_env)?;
+    let db = init_db(&app_env).await?;
+
+    match service_install::check(&cli, &app_env, &db).await {
+        Ok(Some(status)) => {
+            PushRequest::from(status)
+                .make_request(&app_env, &db)
+                .await?;
+        }
+        Ok(None) => {
+            if let Some(skip_request) = ModelSkipRequest::get(&db).await
                 && !skip_request.skip
             {
                 PushRequest::Online.make_request(&app_env, &db).await?;
             }
         }
-        app_env.rm_lock_file();
+        Err(e) => {
+            tracing::error!("service (un)install failed: {e}");
+        }
     }
 
     Ok(())
@@ -173,6 +176,35 @@ mod tests {
         (app_env, db, uuid)
     }
 
+    #[tokio::test]
+    /// A second handle to the same lock file must fail to acquire the lock
+    async fn lock_file_blocks_second_instance() {
+        let mut app_env = gen_app_env(Uuid::new_v4());
+        app_env.location_lock = app_env.location_lock.with_file_name(format!(
+            "lock_{}",
+            Uuid::new_v4().simple()
+        ));
+
+        let open_lock_file =
+            || -> std::io::Result<std::fs::File> {
+                std::fs::OpenOptions::new()
+                    .read(true)
+                    .write(true)
+                    .truncate(false)
+                    .create(true)
+                    .open(&app_env.location_lock)
+            };
+
+        let mut first = RwLock::new(open_lock_file().unwrap());
+        // Guard must be kept bound, else the lock is released immediately
+        let _write_guard = first.try_write().unwrap();
+
+        let mut second = RwLock::new(open_lock_file().unwrap());
+        assert!(second.try_write().is_err());
+
+        std::fs::remove_file(&app_env.location_lock).ok();
+    }
+
     /// Close database connection, and delete all test files
     pub async fn test_cleanup(uuid: Uuid, db: Option<SqlitePool>) {
         if let Some(db) = db {
@@ -185,8 +217,8 @@ mod tests {
             .unwrap()
             .join("windows_tests")
             .join(format!("{uuid}.db"));
-        let sql_sham = sql_name.join("-shm");
-        let sql_wal = sql_name.join("-wal");
+        let sql_sham = sql_name.with_extension("db-shm");
+        let sql_wal = sql_name.with_extension("db-wal");
         tokio::fs::remove_file(sql_wal).await.ok();
         tokio::fs::remove_file(sql_sham).await.ok();
         tokio::fs::remove_file(sql_name).await.ok();

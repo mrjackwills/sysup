@@ -139,10 +139,6 @@ impl AppEnv {
         }
     }
 
-    /// Delete the lock file
-    pub fn rm_lock_file(&self) {
-        std::fs::remove_file(&self.location_lock).ok();
-    }
 }
 
 #[cfg(test)]
