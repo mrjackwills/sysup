@@ -1,7 +1,6 @@
 use jiff::{SpanRound, ToSpan, Unit, Zoned};
 use serde::{Deserialize, Serialize};
 use sqlx::SqlitePool;
-use std::time::Duration;
 use std::{fmt, time::SystemTime};
 
 use crate::app_error::AppError;
@@ -38,7 +37,9 @@ impl ModelRequest {
     }
 
     pub fn timestamp_to_offset(&self, app_env: &AppEnv) -> Zoned {
-        Self::now_with_offset(app_env).saturating_add(Duration::from_secs(self.timestamp))
+        jiff::Timestamp::from_second(i64::try_from(self.timestamp).unwrap_or_default())
+            .unwrap_or_default()
+            .to_zoned(C!(app_env.timezone))
     }
 
     #[cfg(test)]
@@ -141,6 +142,23 @@ mod tests {
 
         assert_eq!(result[3].timestamp, now + 3);
         assert_eq!(result[3].request_id, 4);
+
+        test_cleanup(uuid, Some(db)).await;
+    }
+
+    #[tokio::test]
+    async fn model_request_timestamp_to_offset() {
+        let (app_env, db, uuid) = setup_test().await;
+
+        let result = ModelRequest::insert(&db).await.unwrap();
+        let offset = result.timestamp_to_offset(&app_env);
+
+        // The offset must represent the stored unix timestamp itself,
+        // not the current time with the timestamp added on top
+        assert_eq!(
+            offset.timestamp().as_second(),
+            i64::try_from(result.timestamp).unwrap()
+        );
 
         test_cleanup(uuid, Some(db)).await;
     }
