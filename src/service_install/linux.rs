@@ -45,7 +45,15 @@ impl LinuxService {
 
     /// Create a systemd service file, with correct details
     fn create_service_file(user_name: &str) -> Result<String, AppError> {
-        let current_dir = env::current_dir()?.display().to_string();
+        let exe_path = env::current_exe()?;
+        let exe_dir = exe_path
+            .parent()
+            .map(|p| p.display().to_string())
+            .unwrap_or_default();
+        let exe_name = exe_path
+            .file_name()
+            .map(|p| p.display().to_string())
+            .unwrap_or_else(|| APP_NAME.to_string());
         Ok(format!(
             "[Unit]
 Description={APP_NAME}
@@ -54,8 +62,8 @@ Wants=network-online.target
 StartLimitIntervalSec=0
 
 [Service]
-ExecStart={current_dir}/{APP_NAME}
-WorkingDirectory={current_dir}
+ExecStart={exe_dir}/{exe_name}
+WorkingDirectory={exe_dir}
 SyslogIdentifier={APP_NAME}
 User={user_name}
 Group={user_name}
@@ -78,55 +86,55 @@ WantedBy=multi-user.target"
         Ok(())
     }
 
-    /// If is sudo, and able to get a user name (which isn't root), install leafcast as a service
+    /// If is sudo, and able to get a user name (which isn't root), install sysup as a service
     #[expect(clippy::cognitive_complexity)]
     fn systemd_install(app_env: &AppEnv) -> Result<(), AppError> {
-        if let Some(user_name) = Self::get_sudo_user_name() {
-            Self::chown_config(&user_name, app_env)?;
+        let user_name = Self::get_sudo_user_name().ok_or(AppError::SudoUser)?;
+        Self::chown_config(&user_name, app_env)?;
 
-            debug!("Create service file");
-            let mut file = fs::File::create(Self::get_dot_service())?;
+        debug!("Create service file");
+        let mut file = fs::File::create(Self::get_dot_service())?;
 
-            debug!("Write unit text to file");
-            file.write_all(Self::create_service_file(&user_name)?.as_bytes())?;
+        debug!("Write unit text to file");
+        file.write_all(Self::create_service_file(&user_name)?.as_bytes())?;
 
-            debug!("Reload systemctl daemon");
-            Command::new(SYSTEMCTL).arg("daemon-reload").output()?;
+        debug!("Reload systemctl daemon");
+        Command::new(SYSTEMCTL).arg("daemon-reload").output()?;
 
-            let service_name = Self::get_service_name();
-            debug!("Enable service");
-            Command::new(SYSTEMCTL)
-                .args(["enable", &service_name])
-                .output()?;
-        }
+        let service_name = Self::get_service_name();
+        debug!("Enable service");
+        Command::new(SYSTEMCTL)
+            .args(["enable", &service_name])
+            .output()?;
+
         Ok(())
     }
 
     /// check if unit file in systemd, and delete if true
     #[expect(clippy::cognitive_complexity)]
     fn systemd_uninstall(app_env: &AppEnv) -> Result<(), AppError> {
-        if let Some(user_name) = Self::get_sudo_user_name() {
-            Self::chown_config(&user_name, app_env)?;
-            let service = Self::get_service_name();
+        let user_name = Self::get_sudo_user_name().ok_or(AppError::SudoUser)?;
+        Self::chown_config(&user_name, app_env)?;
+        let service = Self::get_service_name();
 
-            let path = Self::get_dot_service();
+        let path = Self::get_dot_service();
 
-            if Path::new(&path).exists() {
-                debug!("Stopping service");
-                Command::new(SYSTEMCTL).args(["stop", &service]).output()?;
+        if Path::new(&path).exists() {
+            debug!("Stopping service");
+            Command::new(SYSTEMCTL).args(["stop", &service]).output()?;
 
-                debug!("Disabling service");
-                Command::new(SYSTEMCTL)
-                    .args(["disable", &service])
-                    .output()?;
+            debug!("Disabling service");
+            Command::new(SYSTEMCTL)
+                .args(["disable", &service])
+                .output()?;
 
-                debug!("Removing service file");
-                std::fs::remove_file(path)?;
+            debug!("Removing service file");
+            std::fs::remove_file(path)?;
 
-                debug!("Reload daemon-service");
-                Command::new(SYSTEMCTL).arg("daemon-reload").output()?;
-            }
+            debug!("Reload daemon-service");
+            Command::new(SYSTEMCTL).arg("daemon-reload").output()?;
         }
+
         Ok(())
     }
 }
@@ -170,7 +178,12 @@ mod tests {
         let result = LinuxService::create_service_file("test_user");
         assert!(result.is_ok());
 
-        let expected = "[Unit]\nDescription=sysup\nAfter=network-online.target\nWants=network-online.target\nStartLimitIntervalSec=0\n\n[Service]\nExecStart=/workspaces/sysup/sysup\nWorkingDirectory=/workspaces/sysup\nSyslogIdentifier=sysup\nUser=test_user\nGroup=test_user\nRestart=no\n\n[Install]\nWantedBy=multi-user.target";
+        let exe_path = env::current_exe().unwrap();
+        let exe_dir = exe_path.parent().unwrap().display().to_string();
+        let exe_name = exe_path.file_name().unwrap().display().to_string();
+        let expected = format!(
+            "[Unit]\nDescription=sysup\nAfter=network-online.target\nWants=network-online.target\nStartLimitIntervalSec=0\n\n[Service]\nExecStart={exe_dir}/{exe_name}\nWorkingDirectory={exe_dir}\nSyslogIdentifier=sysup\nUser=test_user\nGroup=test_user\nRestart=no\n\n[Install]\nWantedBy=multi-user.target"
+        );
         assert_eq!(result.unwrap(), expected);
     }
 }

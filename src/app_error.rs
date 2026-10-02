@@ -13,6 +13,8 @@ pub enum AppError {
     IOError(#[from] std::io::Error),
     #[error("missing env: '{0}'")]
     MissingEnv(String),
+    #[error("Could not determine sudo user - run sysup via sudo")]
+    SudoUser,
     #[error("Reqwest Error")]
     Reqwest(#[from] reqwest::Error),
     #[error("Internal Database Error: {0}")]

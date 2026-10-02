@@ -282,7 +282,7 @@ mod tests {
     }
     #[cfg(not(target_os = "windows"))]
     fn test_ip() -> &'static str {
-        " Europe/London 172.17.0"
+        " Europe/London 172.18.0.3"
     }
     #[tokio::test]
     async fn test_request_generate_params() {
