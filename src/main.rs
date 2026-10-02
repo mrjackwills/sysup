@@ -180,20 +180,18 @@ mod tests {
     /// A second handle to the same lock file must fail to acquire the lock
     async fn lock_file_blocks_second_instance() {
         let mut app_env = gen_app_env(Uuid::new_v4());
-        app_env.location_lock = app_env.location_lock.with_file_name(format!(
-            "lock_{}",
-            Uuid::new_v4().simple()
-        ));
+        app_env.location_lock = app_env
+            .location_lock
+            .with_file_name(format!("lock_{}", Uuid::new_v4().simple()));
 
-        let open_lock_file =
-            || -> std::io::Result<std::fs::File> {
-                std::fs::OpenOptions::new()
-                    .read(true)
-                    .write(true)
-                    .truncate(false)
-                    .create(true)
-                    .open(&app_env.location_lock)
-            };
+        let open_lock_file = || -> std::io::Result<std::fs::File> {
+            std::fs::OpenOptions::new()
+                .read(true)
+                .write(true)
+                .truncate(false)
+                .create(true)
+                .open(&app_env.location_lock)
+        };
 
         let mut first = RwLock::new(open_lock_file().unwrap());
         // Guard must be kept bound, else the lock is released immediately
